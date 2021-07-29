@@ -1,3 +1,4 @@
+// clear values and reset sheet data
 function reset() {
   $scope.sheet = { A1: 1874, B1: "+", C1: 2046, D1: "⇒", E1: "=A1+C1" };
   for (var input of document.getElementsByTagName("input")) {
@@ -8,22 +9,28 @@ function reset() {
   }
 }
 
+// get sheet data from local storage and create a worker
 function init() {
   ($scope.sheet = JSON.parse(localStorage.getItem(""))) || reset();
   $scope.worker = new Worker("worker.js");
 }
 
 function calc() {
+  // populate input values and flag cells containing formulas
   Object.getOwnPropertyNames($scope.sheet).forEach(function (coord) {
     var input = document.querySelector("#" + coord);
+    // set the corresponding input value, cast to a string
     input.value = "" + $scope.sheet[coord];
+    // set the parent element class if it has a formula
     input.parentElement.setAttribute(
       "class",
       /^=/.exec(input.value[0]) ? "formula" : ""
     );
   });
 
+  // serialize sheet data for insert into local storage
   var json = JSON.stringify($scope.sheet);
+
   // If the worker has not returned in 99 milliseconds, terminate it
   var promise = setTimeout(function () {
     $scope.worker.terminate();
@@ -37,6 +44,7 @@ function calc() {
       vals = message.data[1];
     clearTimeout(promise);
     localStorage.setItem("", json);
+    // iterate over each div
     Object.getOwnPropertyNames(vals).forEach(function (coord) {
       var div = document.querySelector("#_" + coord);
       div.setAttribute(
@@ -54,6 +62,7 @@ function calc() {
 function Spreadsheet($scope) {
   init();
 
+  // create columns in $scope and as elements
   for (
     var col = "A";
     col <= "H";
@@ -64,19 +73,25 @@ function Spreadsheet($scope) {
     document.querySelector("tr").appendChild(th);
     $scope.Cols.push(col);
   }
+
+  // create rows in $scope
   for (var row = 1; row <= 20; row++) {
     $scope.Rows.push(row);
   }
 
+  // create row elements
   $scope.Rows.forEach(function (row) {
+    // set row headers
     var th = document.createElement("th");
     th.innerHTML = row;
     var tr = document.createElement("tr");
     tr.appendChild(th);
 
+    // create individual cells
     $scope.Cols.forEach(function (col) {
       var td = document.createElement("td");
       tr.appendChild(td);
+
       var input = document.createElement("input");
       input.setAttribute("id", col + row);
       if (!(col + row in $scope.sheet)) {
