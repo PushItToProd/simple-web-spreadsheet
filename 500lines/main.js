@@ -110,6 +110,7 @@
 
         var input = document.createElement("input");
         input.setAttribute("id", col + row);
+        // initialize sheet data
         if (!(col + row in $scope.sheet)) {
           $scope.sheet[col + row] = "";
         }
