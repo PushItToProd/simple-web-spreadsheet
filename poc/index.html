@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Sheetable - Web Spreadsheets POC</title>
+
+  <link href="styles.css" rel="stylesheet">
   <script type="module">
     import {Sheetable} from './sheetable.js';
-    Sheetable(document.getElementById('spreadsheet'));
-    Sheetable(document.getElementById('resetBtn'));
+    let sheet = Sheetable(document.getElementById('spreadsheet'));
   </script>
 </head>
 <body>
