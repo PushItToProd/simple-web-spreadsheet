@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sheetable - Web Spreadsheets POC</title>
+  <script type="module">
+    import {Sheetable} from './sheetable.js';
+    Sheetable(document.getElementById('spreadsheet'));
+    Sheetable(document.getElementById('resetBtn'));
+  </script>
+</head>
+<body>
+  <table id="spreadsheet">
+    <tr>
+      <th>
+        <button id="resetBtn" type="button" onclick="hello()">↻</button>
+      </th>
+    </tr>
+  </table>
+</body>
+</html>
