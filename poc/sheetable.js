@@ -49,7 +49,7 @@ function fillTable(table, {numRows, numCols}) {
   }
 
   // generate each row
-  for (let rowNum = 0; rowNum < numRows; rowNum++) {
+  for (let rowNum = 1; rowNum <= numRows; rowNum++) {
     let tableRow = $.tr();
     tableRow.appendChild($.th(rowNum));
 
