@@ -1,6 +1,6 @@
 (function(window) {
   window.$scope = {
-    sheet: [],
+    sheet: {},
     worker: null,
   };
   window.onload = function() {
@@ -39,6 +39,10 @@
     // populate input values and flag cells containing formulas
     Object.getOwnPropertyNames($scope.sheet).forEach(function (coord) {
       var input = document.querySelector("#" + coord);
+      if (input === null) {
+        console.warn("null input for", coord);
+        return;
+      }
       // set the corresponding input value, cast to a string
       input.value = "" + $scope.sheet[coord];
       // set the parent element class if it has a formula
@@ -67,6 +71,10 @@
       // iterate over each div
       Object.getOwnPropertyNames(vals).forEach(function (coord) {
         var div = document.querySelector("#_" + coord);
+        if (div === null) {
+          console.warn("null div for", coord);
+          return;
+        }
         div.setAttribute(
           "class",
           errs[coord] ? "error" : vals[coord][0] ? "text" : ""
@@ -90,17 +98,19 @@
       col = String.fromCharCode(col.charCodeAt() + 1)
     ) {
       var th = document.createElement("th");
+      th.id = `col${col}`;
       th.textContent = col;
       document.querySelector("tr").appendChild(th);
       colNames.push(col);
     }
 
     // create rows in $scope
-    for (var row = 1; row <= 20; row++) {
+    for (let row = 1; row <= 20; row++) {
       // set row headers
       var th = document.createElement("th");
       th.innerHTML = row;
       var tr = document.createElement("tr");
+      tr.id = `row${row}`;
       tr.appendChild(th);
 
       // create individual cells
@@ -115,18 +125,19 @@
           $scope.sheet[col + row] = "";
         }
 
-        for (var event of ["change", "input", "paste"]) {
-          input.addEventListener(event, function () {
-            $scope.sheet[col + row] = input.value;
-            calc();
-          });
+        input.onchange = input.oninput = input.onpaste = function() {
+          if (row == 21) {
+            debugger;
+          }
+          $scope.sheet[col + row] = input.value;
+          calc();
         }
 
         input.addEventListener("keydown", function (event) {
           switch (event.which) {
-            case 38:
-            case 40:
-            case 13:
+            case 38:  // ArrowUp
+            case 40:  // ArrowDown
+            case 13:  // Enter
               var direction = event.which === 38 ? -1 : +1;
               (
                 document.querySelector("#" + col + (row + direction)) ||
@@ -145,7 +156,7 @@
       });
 
       document.querySelector("table").appendChild(tr);
-    });
+    }
 
     // Start calculation when worker is ready
     $scope.worker.onmessage = calc;
