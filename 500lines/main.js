@@ -18,16 +18,23 @@
     $scope.sheet = { A1: 1874, B1: "+", C1: 2046, D1: "⇒", E1: "=A1+C1" };
     for (var input of document.getElementsByTagName("input")) {
       input.value = "";
+      input.setAttribute("class", "");
     }
     for (var div of document.getElementsByTagName("div")) {
       div.textContent = "";
+      div.setAttribute("class", "");
     }
   }
 
   // get sheet data from local storage and create a worker
   function init() {
-    ($scope.sheet = JSON.parse(localStorage.getItem(""))) || reset();
     $scope.worker = new Worker("worker.js");
+    let saveData = JSON.parse(localStorage.getItem(""));
+    if (saveData) {
+      $scope.sheet = $saveData;
+      return;
+    }
+    reset();
   }
 
   function calc() {
