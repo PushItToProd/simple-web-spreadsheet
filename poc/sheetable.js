@@ -16,6 +16,26 @@ function columnName(i) {
   return String.fromCharCode(A + i);  // TODO: handle i>= 26
 }
 
+function tr() {
+  return document.createElement("tr");
+}
+
+function th(text = null) {
+  let e = document.createElement("th");
+  if (text !== null) {
+    e.textContent = text;
+  }
+  return e
+}
+
+function td(text = null) {
+  let e =  document.createElement("td");
+  if (text !== null) {
+    e.textContent = text;
+  }
+  return e;
+}
+
 export function Sheetable(element, options = getDefaults()) {
   if (!(element instanceof HTMLTableElement)) {
     throw `Sheetable expects an HTMLTableElement but got ` +
@@ -25,10 +45,10 @@ export function Sheetable(element, options = getDefaults()) {
 
 
   // generate the table elements
-  buildTable(element, options);
+  fillTable(element, options);
 }
 
-function buildTable(table, {numRows, numCols}) {
+function fillTable(table, {numRows, numCols}) {
   /*
   <table id="spreadsheet">
     <tr>
@@ -39,21 +59,33 @@ function buildTable(table, {numRows, numCols}) {
   </table>
   */
 
-  const headerRow = document.querySelector("tr");
-
-  // first build the list of column names and the row of column header elements
-  let cols = [];
-  for (let col = 0; col < numCols; col++) {
-    let colName = columnName(col);
-    cols.push(colName);
-
-    let colHeader = document.createElement("th");
-    colHeader.textContent = colName;
-    headerRow.appendChild(colHeader);
+  // build the list of column names and the row of column header elements,
+  // appending each element to the header row
+  const tableHeader = document.querySelector("tr");
+  let colNames = [];
+  for (let colNum = 0; colNum < numCols; colNum++) {
+    let colName = columnName(colNum);
+    colNames.push(colName);
+    tableHeader.appendChild(th(colName));
   }
+  console.log("Columns:", colNames);
 
-  let rows = [];
-  for (let i = 0; i < numRows; i++) {
-    rows.push(i);
+  // generate each row
+  for (let rowNum = 0; rowNum < numRows; rowNum++) {
+    console.log("Adding row:", rowNum);
+    let tableRow = tr();
+    tableRow.appendChild(th(rowNum));
+
+    colNames.forEach(col => {
+      let cell = td();
+      tableRow.append(cell);
+
+      //let input = document.createElement("input");
+      let div = document.createElement("div");
+      div.setAttribute("id", "_" + col + rowNum);
+      div.innerHTML = "" + col + rowNum;
+      cell.append(div);
+    })
+    table.append(tableRow);
   }
 }
