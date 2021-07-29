@@ -6,12 +6,22 @@ export function find(selector) {
   return document.querySelectorAll(selector);
 }
 
+export function create(element) {
+  return document.createElement(element);
+}
+
+export function button(text) {
+  let e = create("button");
+  e.textContent = text;
+  return e;
+}
+
 export function tr() {
-  return document.createElement("tr");
+  return create("tr");
 }
 
 export function th(text = null) {
-  let e = document.createElement("th");
+  let e = create("th");
   if (text !== null) {
     e.textContent = text;
   }
@@ -19,7 +29,7 @@ export function th(text = null) {
 }
 
 export function td(text = null) {
-  let e =  document.createElement("td");
+  let e =  create("td");
   if (text !== null) {
     e.textContent = text;
   }

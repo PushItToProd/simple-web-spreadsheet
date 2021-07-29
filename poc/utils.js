@@ -4,3 +4,7 @@ export function getType(o) {
   // name
   return Object.prototype.toString.call(o).slice(8, -1);
 }
+
+export function isString(o) {
+  return getType(o) === "String";
+}
