@@ -31,7 +31,7 @@
     $scope.worker = new Worker("worker.js");
     let saveData = JSON.parse(localStorage.getItem(""));
     if (saveData) {
-      $scope.sheet = $saveData;
+      $scope.sheet = saveData;
       return;
     }
     reset();
