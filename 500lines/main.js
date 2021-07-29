@@ -1,7 +1,5 @@
 (function(window) {
   window.$scope = {
-    Rows: [],
-    Cols: [],
     sheet: [],
     worker: null,
   };
@@ -84,6 +82,7 @@
   function Spreadsheet($scope) {
     init();
 
+    let colNames = [];
     // create columns in $scope and as elements
     for (
       var col = "A";
@@ -93,16 +92,11 @@
       var th = document.createElement("th");
       th.textContent = col;
       document.querySelector("tr").appendChild(th);
-      $scope.Cols.push(col);
+      colNames.push(col);
     }
 
     // create rows in $scope
     for (var row = 1; row <= 20; row++) {
-      $scope.Rows.push(row);
-    }
-
-    // create row elements
-    $scope.Rows.forEach(function (row) {
       // set row headers
       var th = document.createElement("th");
       th.innerHTML = row;
@@ -110,7 +104,7 @@
       tr.appendChild(th);
 
       // create individual cells
-      $scope.Cols.forEach(function (col) {
+      colNames.forEach(function (col) {
         var td = document.createElement("td");
         tr.appendChild(td);
 
