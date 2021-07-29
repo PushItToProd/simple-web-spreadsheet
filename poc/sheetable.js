@@ -31,16 +31,14 @@ export function Sheetable(element, options = getDefaults()) {
 
 function fillTable(table, {numRows, numCols}) {
   let tableHeader = $.tr();
-  table.append(tableHeader);
-
   let resetButton = $.button("↻");
   resetButton.onclick = function() {
     alert('TODO')
   }
   tableHeader.append(resetButton);
+  table.append(tableHeader);
 
-  // build the list of column names and the row of column header elements,
-  // appending each element to the header row
+  // generate column headers
   let colNames = [];
   for (let colNum = 0; colNum < numCols; colNum++) {
     let colName = columnName(colNum);
