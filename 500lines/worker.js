@@ -1,4 +1,5 @@
 var sheet, errs, vals;
+
 self.onmessage = function (message) {
   // reset state vars
   sheet = message.data || {};
@@ -26,20 +27,29 @@ self.onmessage = function (message) {
           x = sheet[coord];
         }
 
-        // Evaluate formula cells that begin with =
-        try {
-          vals[coord] = "=" === x[0] ? eval.call(null, x.slice(1)) : x;
-        } catch (e) {
-          var match = /\$?[A-Za-z]+[1-9][0-9]*\b/.exec(e);
-          if (match && !(match[0] in self)) {
-            // The formula refers to a uninitialized cell; set it to 0 and retry
-            self[match[0]] = 0;
-            delete vals[coord];
-            return self[coord];
-          }
-          // Otherwise, stringify the caught exception in the errs object
-          errs[coord] = e.toString();
+        // Return non-formulas directly
+        if (x[0] !== "=") {
+          return vals[coord] = x;
         }
+
+        // Evaluate formula cells
+        try {
+          vals[coord] = eval.call(null, x.slice(1));
+        } catch (e) {
+          console.log("Evaluating", coord, "failed with", e);
+          // Handle reference errors
+          if (e instanceof ReferenceError) {
+            // get the var name from the exception
+            let refName = e.message.split(" ", 1)[0];
+            console.log("Got reference error for var", refName);
+            errs[coord] = `Bad Ref: ${refName}`;
+          } else {
+            // Otherwise, stringify the caught exception in the errs object
+            errs[coord] = e.toString();
+          }
+          return NaN;
+        }
+
         // Turn vals[coord] into a string if it's not a number or boolean
         switch (typeof vals[coord]) {
           case "function":
