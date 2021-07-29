@@ -142,6 +142,9 @@
 
         var div = document.createElement("div");
         div.setAttribute("id", "_" + col + row);
+        div.onclick = function() {
+          input.focus();
+        }
         td.appendChild(input);
         td.appendChild(div);
       });
