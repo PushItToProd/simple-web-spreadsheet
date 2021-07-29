@@ -53,15 +53,17 @@ function fillTable(table, {numRows, numCols}) {
     let tableRow = $.tr();
     tableRow.appendChild($.th(rowNum));
 
-    colNames.forEach(col => {
+    colNames.forEach(colName => {
       let cell = $.td();
       tableRow.append(cell);
 
-      //let input = document.createElement("input");
-      let div = document.createElement("div");
-      div.setAttribute("id", "_" + col + rowNum);
-      div.innerHTML = "" + col + rowNum;
-      cell.append(div);
+      let cellId = `${colName}${rowNum}`;
+
+      let cellInput = $.input(cellId);
+      cell.append(cellInput);
+
+      let cellDiv = $.div(`_${cellId}`);
+      cell.append(cellDiv);
     })
     table.append(tableRow);
   }

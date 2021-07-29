@@ -35,3 +35,15 @@ export function td(text = null) {
   }
   return e;
 }
+
+export function input(id) {
+  let e = create("input");
+  e.id = id;
+  return e;
+}
+
+export function div(id) {
+  let e = create("div");
+  e.id = id;
+  return e;
+}
