@@ -22,8 +22,8 @@ export function Sheetable(element, options = getDefaults()) {
     throw `Sheetable expects an HTMLTableElement but got ` +
       `${element} of type ${utils.getType(element)}`;
   }
-  console.log("Initializing sheet on element", element);
 
+  console.log("Initializing sheet on element", element);
 
   // generate the table elements
   fillTable(element, options);
@@ -32,7 +32,7 @@ export function Sheetable(element, options = getDefaults()) {
 function fillTable(table, {numRows, numCols}) {
   // build the list of column names and the row of column header elements,
   // appending each element to the header row
-  const tableHeader = document.querySelector("tr");
+  const tableHeader = table.querySelector("tr");
   let colNames = [];
   for (let colNum = 0; colNum < numCols; colNum++) {
     let colName = columnName(colNum);
