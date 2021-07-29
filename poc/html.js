@@ -10,6 +10,13 @@ export function create(element) {
   return document.createElement(element);
 }
 
+export function focus(selector) {
+  let e;
+  if (e = get(selector)) {
+    e.focus();
+  }
+}
+
 export function button(text) {
   let e = create("button");
   e.textContent = text;
