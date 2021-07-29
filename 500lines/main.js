@@ -1,5 +1,17 @@
 (function(window) {
-  window.$scope = {Rows: [], Cols: [], sheet: []};
+  window.$scope = {
+    Rows: [],
+    Cols: [],
+    sheet: [],
+    worker: null,
+  };
+  window.onload = function() {
+    Spreadsheet(window.$scope);
+  }
+  window.spreadsheetReset = function() {
+    reset();
+    calc();
+  }
 
   // clear values and reset sheet data
   function reset() {
@@ -135,6 +147,5 @@
     $scope.worker.postMessage(null);
   }
 
-  window.onload = Spreadsheet($scope);
 
 })(window);
