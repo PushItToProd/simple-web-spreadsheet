@@ -14,6 +14,7 @@ class TimedWorker {
 
     this.callback = callback;
     this.timeoutCallback = timeoutCallback || (_ => {});
+    this.timeout = this.TIMEOUT;
   }
 
   // initialize the worker object
@@ -43,12 +44,15 @@ class TimedWorker {
       this.timeoutCallback(message);
     }
 
+    let timer;
     this.worker.onmessage = (message) => {
       console.info("TimedWorker responded - triggering callback")
       clearTimeout(timer);
       callback(message);
     }
-    let timer = setTimeout(timeoutCallback, this.TIMEOUT);
+    if (this.timeout && this.timeout > 0) {
+      timer = setTimeout(timeoutCallback, this.timeout);
+    }
     this.worker.postMessage(message);
   }
 }
