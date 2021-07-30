@@ -1,6 +1,8 @@
-var sheet, errs, vals;
-
 self.importScripts("./utils.js");
+
+// these have to be global for them to be accessible in the property getter
+// function
+var sheet, errs, vals;
 
 self.onmessage = function (message) {
   // reset state vars
