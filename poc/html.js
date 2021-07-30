@@ -1,3 +1,7 @@
+export function id(id) {
+  return document.getElementById(id);
+}
+
 export function get(selector) {
   return document.querySelector(selector);
 }

@@ -77,9 +77,13 @@ export class Sheetable {
 
     // startup - start the worker and fill the table
     this.fillTable();
-    this.worker = new TimedWorker(this.workerCallback, this.workerTimeout, () => {
-      this.worker.send(this.inputs);
-    });
+    this.worker = new TimedWorker(
+      (message) => {this.workerCallback(message)},
+      (message) => {this.workerTimeout(message)},
+      () => {
+        this.worker.send(this.inputs);
+      }
+    );
   }
 
   // triggered on user input - use this to recalc
@@ -102,9 +106,10 @@ export class Sheetable {
     let {vals, errs} = message.data;
     for (let coord in vals) {
       // find the div for the cell
-      let div = $.get(this.cellDivId(coord));
+      let divId = this.cellDivId(coord);
+      let div = $.id(divId);
       if (div === null) {
-        console.warn("no <div> for", coord);
+        console.warn("no <div> for", coord, "with id", divId);
         continue;
       }
 
