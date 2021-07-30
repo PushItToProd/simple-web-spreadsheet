@@ -159,8 +159,8 @@
     }
 
     // Start calculation when worker is ready
-    $scope.worker.onmessage = calc;
-    $scope.worker.postMessage(null);
+    // $scope.worker.onmessage = calc;
+    // $scope.worker.postMessage(null);
   }
 
 
