@@ -25,13 +25,16 @@ self.onmessage = function (message) {
           return vals[coord];
         }
 
-        // initialize value to NaN just in case
-        vals[coord] = NaN;
-
         // bail out if the coordinate isn't actually in the sheet
         if (!(coord in sheet)) {
+          console.error(
+            "coordinate", coord, "has a getter but isn't in the sheet", sheet
+          );
           return NaN
         }
+
+        // initialize value to NaN just in case
+        vals[coord] = NaN;
 
         // coerce numeric values so calculations will work properly
         var sheetVal = tryCoerceNum(sheet[coord]);
