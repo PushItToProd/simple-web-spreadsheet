@@ -67,7 +67,11 @@
       var errs = message.data[0],
         vals = message.data[1];
       clearTimeout(promise);
+
+      // why is this here? the only reason I can think of is to avoid saving
+      // the sheet data if the worker times out, but is that actually useful?
       localStorage.setItem("", json);
+
       // iterate over each div
       forEachProperty(vals, function (coord) {
         var div = document.querySelector("#_" + coord);
