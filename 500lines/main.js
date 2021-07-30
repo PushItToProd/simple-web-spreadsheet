@@ -13,7 +13,8 @@
 
   // clear values and reset sheet data
   function reset() {
-    $scope.sheet = { A1: 1874, B1: "+", C1: 2046, D1: "⇒", E1: "=A1+C1" };
+    // $scope.sheet = { A1: 1874, B1: "+", C1: 2046, D1: "⇒", E1: "=A1+C1" };
+    $scope.sheet = {};
     for (var input of document.getElementsByTagName("input")) {
       input.value = "";
       input.setAttribute("class", "");
