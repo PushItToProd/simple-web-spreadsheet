@@ -10,8 +10,8 @@ self.onmessage = function (message) {
 
   // define each sheet address as a property on self
   forEachProperty(sheet, function (coord) {
-    // Worker is reused across computations, so only define each variable once
-    if ((Object.getOwnPropertyDescriptor(self, coord) || {}).get) {
+    // Worker is reused across computations, so only define each getter once
+    if (hasGetter(self, coord)) {
       return;
     }
 

@@ -2,6 +2,10 @@ function forEachProperty(obj, callback) {
   Object.getOwnPropertyNames(obj).forEach(callback);
 }
 
+function hasGetter(obj, name) {
+  return !!((Object.getOwnPropertyDescriptor(obj, name) || {}).get);
+}
+
 // convert to a num if possible
 function tryCoerceNum(n) {
   // +n abuses JS type coercion to turn numeric strings into numbers
