@@ -8,3 +8,11 @@ export function getType(o) {
 export function isString(o) {
   return getType(o) === "String";
 }
+
+function forEachProperty(obj, callback) {
+  Object.getOwnPropertyNames(obj).forEach(callback);
+}
+
+function hasGetter(obj, name) {
+  return !!((Object.getOwnPropertyDescriptor(obj, name) || {}).get);
+}

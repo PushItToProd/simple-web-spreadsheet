@@ -6,40 +6,142 @@ function columnName(i) {
   return String.fromCharCode(A + i);  // TODO: handle i>= 26
 }
 
-// have to use a function because if we do
-//    function (options = Defaults)
-// where Defaults is an object, it'll retain a mutable reference to the object
-// across invocations
-function getDefaults() {
-  return {
-    numRows: 10,
-    numCols: 10,
+class TimedWorker {
+  WORKER_SCRIPT = "worker.js"
+  TIMEOUT = 100;
+  constructor(callback, timeoutCallback = _ => {}, initCallback = _ => {}) {
+    this.initWorker(initCallback);
+
+    this.callback = callback;
+    this.timeoutCallback = timeoutCallback || (_ => {});
+  }
+
+  // initialize the worker object
+  initWorker(callback) {
+    // don't initialize if the worker is still there
+    if (this.worker) return;
+    this.worker = new Worker(this.WORKER_SCRIPT);
+    this.worker.onmessage = callback;
+    this.worker.postMessage(null);
+  }
+
+  // kill the worker and reinitialize it
+  killWorker() {
+    this.worker.terminate();
+    this.worker = null;
+    this.initWorker();
+  }
+
+  send(message, callback = null) {
+    if (callback === null) {
+      callback = this.callback;
+    }
+
+    let timeoutCallback = () => {
+      console.warn("TimedWorker timed out - killing it")
+      this.killWorker();
+      this.timeoutCallback(message);
+    }
+
+    this.worker.onmessage = (message) => {
+      console.info("TimedWorker responded - triggering callback")
+      clearTimeout(timer);
+      callback(message);
+    }
+    let timer = setTimeout(timeoutCallback, this.TIMEOUT);
+    this.worker.postMessage(message);
   }
 }
 
 export class Sheetable {
-  constructor(tableElement, options = getDefaults(), inputs = {}) {
+  // have to use a function because if we do
+  //    function (options = Defaults)
+  // where Defaults is an object, it'll retain a mutable reference to the object
+  // across invocations
+  getDefaults() {
+    return {
+      numRows: 10,
+      numCols: 10,
+    }
+  }
+
+  constructor(tableElement, options = {}, inputs = {}) {
     if (!(tableElement instanceof HTMLTableElement)) {
       throw `Sheetable expects an HTMLTableElement but got ` +
         `${tableElement} of type ${utils.getType(tableElement)}`;
     }
 
-    console.log("Initializing sheet on tableElement", tableElement);
     this.tableElement = tableElement;
-    this.options = options;
+    this.options = Object.assign(this.getDefaults(), options);
     this.inputs = inputs;
 
-    // generate the table elements
-    console.log("calling fillTAble")
+    // startup - start the worker and fill the table
     this.fillTable();
+    this.worker = new TimedWorker(this.workerCallback, this.workerTimeout, () => {
+      this.worker.send(this.inputs);
+    });
   }
 
-  recalculate() {
-    console.warn("TODO: recalculate")
+  // triggered on user input - use this to recalc
+  recalcOnInput() {
+    console.warn("TODO: recalcOnInput");
+
+    // trigger the worker
+  }
+
+  cellInputId(coord) {
+    return `${this.tableElement.id}_input_${coord}`
+  }
+
+  cellDivId(coord) {
+    return `${this.tableElement.id}_output_${coord}`
+  }
+
+  // take the response from the worker and populate the <div>s in the table
+  workerCallback(message) {
+    let {vals, errs} = message.data;
+    for (let coord in vals) {
+      // find the div for the cell
+      let div = $.get(this.cellDivId(coord));
+      if (div === null) {
+        console.warn("no <div> for", coord);
+        continue;
+      }
+
+      // if there's an error for the cell, set its value and move on
+      if (errs[coord]) {
+        div.className = "error";
+        div.textContent = errs[coord];
+        continue;
+      }
+
+      div.className = "";
+      div.textContent = vals[coord];
+
+      if (typeof vals[coord] === 'string') {
+        div.className = "text";
+      }
+    }
+  }
+
+  workerTimeout() {
+    console.error("worker timed out");
+  }
+
+  reset() {
+    this.inputs = {};
+    let element;
+    for (element of this.tableElement.getElementsByTagName("input")) {
+      element.value = "";
+      element.setAttribute("class", "");
+    }
+    for (element of this.tableElement.getElementsByTagName("div")) {
+      element.textContent = "";
+      element.setAttribute("class", "");
+    }
   }
 
   fillTable({numRows, numCols} = this.options) {
-    console.log("fillTable")
     let tableHeader = $.tr();
     let resetButton = $.button("↻");
     resetButton.onclick = function() {
@@ -75,13 +177,13 @@ export class Sheetable {
     let cell = $.td();
     let cellId = `${col}${row}`
 
-    let input = $.input(cellId);
+    let input = $.input(this.cellInputId(cellId));
     input.id = cellId;
 
     // save input data
-    input.onchange = input.oninput = input.onpaste = function() {
+    input.onchange = input.oninput = input.onpaste = () => {
       this.inputs[cellId] = input.value;
-      this.recalculate();
+      this.recalcOnInput();
     }
 
     input.onkeydown = function(event) {
@@ -101,7 +203,7 @@ export class Sheetable {
     }
 
     cell.append(input);
-    let div = $.div(`_${cellId}`);
+    let div = $.div(this.cellDivId(cellId));
     cell.append(div);
 
     return cell;
