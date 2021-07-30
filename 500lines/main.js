@@ -37,7 +37,6 @@
 
   function calc() {
     // populate input values and flag cells containing formulas
-    // Object.getOwnPropertyNames($scope.sheet).forEach(function (coord) {
     forEachProperty($scope.sheet, function(coord) {
       var input = document.querySelector("#" + coord);
       if (input === null) {
