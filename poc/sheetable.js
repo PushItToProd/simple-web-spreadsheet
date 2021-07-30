@@ -103,7 +103,7 @@ export class Sheetable {
 
   // take the response from the worker and populate the <div>s in the table
   workerCallback(message) {
-    let {vals, errs} = message.data;
+    let {vals} = message.data;
     for (let coord in vals) {
       // find the div for the cell
       let divId = this.cellDivId(coord);
@@ -113,10 +113,12 @@ export class Sheetable {
         continue;
       }
 
+      let val = vals[coord];
+
       // if there's an error for the cell, set its value and move on
-      if (errs[coord]) {
+      if (val.error) {
         div.className = "error";
-        div.textContent = errs[coord];
+        div.textContent = val.error;
         continue;
       }
 
