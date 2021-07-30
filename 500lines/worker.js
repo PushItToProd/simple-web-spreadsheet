@@ -24,19 +24,16 @@ self.onmessage = function (message) {
         vals[coord] = NaN;
 
         // Turn numeric strings into numbers, so =A1+C1 works when both are numbers
-        var x = +sheet[coord];
-        if (sheet[coord] !== x.toString()) {
-          x = sheet[coord];
-        }
+        var sheetVal = tryCoerceNum(sheet[coord]);
 
-        // Return non-formulas directly
-        if (x[0] !== "=") {
-          return vals[coord] = x;
+        // Return non-formulas directly without evaluating
+        if (!isFormula(sheetVal)) {
+          return vals[coord] = sheetVal;
         }
 
         // Evaluate formula cells
         try {
-          vals[coord] = eval(x.slice(1));
+          vals[coord] = eval(sheetVal.slice(1));
         } catch (e) {
           console.log("Evaluating", coord, "failed with", e);
           // Handle reference errors
