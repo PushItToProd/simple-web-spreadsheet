@@ -37,7 +37,8 @@
 
   function calc() {
     // populate input values and flag cells containing formulas
-    Object.getOwnPropertyNames($scope.sheet).forEach(function (coord) {
+    // Object.getOwnPropertyNames($scope.sheet).forEach(function (coord) {
+    forEachProperty($scope.sheet, function(coord) {
       var input = document.querySelector("#" + coord);
       if (input === null) {
         console.warn("null input for", coord);
@@ -69,7 +70,7 @@
       clearTimeout(promise);
       localStorage.setItem("", json);
       // iterate over each div
-      Object.getOwnPropertyNames(vals).forEach(function (coord) {
+      forEachProperty(vals, function (coord) {
         var div = document.querySelector("#_" + coord);
         if (div === null) {
           console.warn("null div for", coord);

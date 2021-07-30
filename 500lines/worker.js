@@ -1,5 +1,7 @@
 var sheet, errs, vals;
 
+self.importScripts("./utils.js");
+
 self.onmessage = function (message) {
   // reset state vars
   sheet = message.data || {};
@@ -7,7 +9,7 @@ self.onmessage = function (message) {
   vals = {};
 
   // define each sheet address as a property on self
-  Object.getOwnPropertyNames(sheet).forEach(function (coord) {
+  forEachProperty(sheet, function (coord) {
     // Worker is reused across computations, so only define each variable once
     if ((Object.getOwnPropertyDescriptor(self, coord) || {}).get) {
       return;
