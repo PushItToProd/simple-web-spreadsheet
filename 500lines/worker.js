@@ -18,12 +18,20 @@ self.onmessage = function (message) {
     // Define self['A1'], which is the same thing as the global variable A1
     Object.defineProperty(self, coord, {
       get: function () {
+        // use a cached value if we have one
         if (coord in vals) {
           return vals[coord];
         }
+
+        // initialize value to NaN just in case
         vals[coord] = NaN;
 
-        // Turn numeric strings into numbers, so =A1+C1 works when both are numbers
+        // bail out if the coordinate isn't actually in the sheet
+        if (!(coord in sheet)) {
+          return NaN
+        }
+
+        // coerce numeric values so calculations will work properly
         var sheetVal = tryCoerceNum(sheet[coord]);
 
         // Return non-formulas directly without evaluating
@@ -46,7 +54,7 @@ self.onmessage = function (message) {
             // Otherwise, stringify the caught exception in the errs object
             errs[coord] = e.toString();
           }
-          return NaN;
+          return vals[coord] = NaN;
         }
 
         // Turn vals[coord] into a string if it's not a number or boolean
