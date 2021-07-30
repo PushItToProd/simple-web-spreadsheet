@@ -1,9 +1,14 @@
+// self.importScripts("math.js");
+
+
 self.onmessage = function(message) {
   sheet = message.data || {};
-  vals = {A1: 1, B1: 2, C1: 3, A2: {error: "error!"}};
+  vals = {};
 
-  // console.log("running worker");
-  // TODO
+  // for (let coord in sheet) {
+  //   // TODO
+  // }
 
-  postMessage({vals});
+  // postMessage({vals});
+  postMessage({vals: sheet})
 };

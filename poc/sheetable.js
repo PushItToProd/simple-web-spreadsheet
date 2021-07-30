@@ -78,30 +78,29 @@ export class Sheetable {
     // startup - start the worker and fill the table
     this.fillTable();
     this.worker = new TimedWorker(
+      // success callback
       (message) => {this.workerCallback(message)},
+      // timeout callback
       (message) => {this.workerTimeout(message)},
+      // post-init callback
       () => {
         this.worker.send(this.inputs);
       }
     );
   }
 
-  // triggered on user input - use this to recalc
-  recalcOnInput() {
-    console.warn("TODO: recalcOnInput");
-
-    // trigger the worker
+  // trigger the worker to recalculate the values -- upon success,
+  // workerCallback will be triggered
+  recalc() {
+    this.worker.send(this.inputs);
   }
 
-  cellInputId(coord) {
-    return `${this.tableElement.id}_input_${coord}`
+  workerTimeout() {
+    console.error("worker timed out");
   }
 
-  cellDivId(coord) {
-    return `${this.tableElement.id}_output_${coord}`
-  }
-
-  // take the response from the worker and populate the <div>s in the table
+  // when the worker responds, take the results and populate the <div>s in the
+  // table
   workerCallback(message) {
     let {vals} = message.data;
     for (let coord in vals) {
@@ -128,10 +127,6 @@ export class Sheetable {
       }
       div.textContent = vals[coord];
     }
-  }
-
-  workerTimeout() {
-    console.error("worker timed out");
   }
 
   reset() {
@@ -189,7 +184,7 @@ export class Sheetable {
     // save input data
     input.onchange = input.oninput = input.onpaste = () => {
       this.inputs[cellId] = input.value;
-      this.recalcOnInput();
+      this.recalc();
     }
 
     input.onkeydown = function(event) {
@@ -213,5 +208,13 @@ export class Sheetable {
     cell.append(div);
 
     return cell;
+  }
+
+  cellInputId(coord) {
+    return `${this.tableElement.id}_input_${coord}`
+  }
+
+  cellDivId(coord) {
+    return `${this.tableElement.id}_output_${coord}`
   }
 }
