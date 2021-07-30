@@ -17,89 +17,93 @@ function getDefaults() {
   }
 }
 
-export function Sheetable(element, options = getDefaults(), data = {}) {
-  if (!(element instanceof HTMLTableElement)) {
-    throw `Sheetable expects an HTMLTableElement but got ` +
-      `${element} of type ${utils.getType(element)}`;
-  }
-
-  console.log("Initializing sheet on element", element);
-
-  let $sheet = {
-    data: data,
-    recalculate() {
-      console.warning("TODO: recalculate")
+export class Sheetable {
+  constructor(tableElement, options = getDefaults(), inputs = {}) {
+    if (!(tableElement instanceof HTMLTableElement)) {
+      throw `Sheetable expects an HTMLTableElement but got ` +
+        `${tableElement} of type ${utils.getType(tableElement)}`;
     }
-  };
 
-  // generate the table elements
-  fillTable(element, options, $sheet);
-}
+    console.log("Initializing sheet on tableElement", tableElement);
+    this.tableElement = tableElement;
+    this.options = options;
+    this.inputs = inputs;
 
-function fillTable(table, {numRows, numCols}, $sheet) {
-  let tableHeader = $.tr();
-  let resetButton = $.button("↻");
-  resetButton.onclick = function() {
-    alert('TODO')
-  }
-  tableHeader.append(resetButton);
-  table.append(tableHeader);
-
-  // generate column headers
-  let colNames = [];
-  for (let colNum = 0; colNum < numCols; colNum++) {
-    let colName = columnName(colNum);
-    colNames.push(colName);
-
-    let colHeader = $.th(colName);
-    tableHeader.append(colHeader);
+    // generate the table elements
+    console.log("calling fillTAble")
+    this.fillTable();
   }
 
-  // generate each row
-  for (let rowNum = 1; rowNum <= numRows; rowNum++) {
-    let tableRow = $.tr();
-    tableRow.appendChild($.th(rowNum));
-
-    colNames.forEach(colName => {
-      tableRow.append(makeCell(colName, rowNum, $sheet));
-    })
-
-    table.append(tableRow);
-  }
-}
-
-function makeCell(col, row, $sheet) {
-  let cell = $.td();
-  let cellId = `${col}${row}`
-
-  let input = $.input(cellId);
-  input.id = cellId;
-
-  // save input data
-  input.onchange = input.oninput = input.onpaste = function() {
-    $sheet.data[cellId] = input.value;
-    $sheet.recalculate();
+  recalculate() {
+    console.warn("TODO: recalculate")
   }
 
-  input.onkeydown = function(event) {
-    let id;
-    switch (event.key) {
-      case "ArrowUp":
-        id = `#${col}${row-1}`;
-        break;
-      case "ArrowDown":
-      case "Enter":
-        id = `#${col}${row+1}`;
-        break;
-      default:
-        return;
+  fillTable({numRows, numCols} = this.options) {
+    console.log("fillTable")
+    let tableHeader = $.tr();
+    let resetButton = $.button("↻");
+    resetButton.onclick = function() {
+      alert('TODO')
     }
-    $.focus(id);
+    tableHeader.append(resetButton);
+    this.tableElement.append(tableHeader);
+
+    // generate column headers
+    let colNames = [];
+    for (let colNum = 0; colNum < numCols; colNum++) {
+      let colName = columnName(colNum);
+      colNames.push(colName);
+
+      let colHeader = $.th(colName);
+      tableHeader.append(colHeader);
+    }
+
+    // generate each row
+    for (let rowNum = 1; rowNum <= numRows; rowNum++) {
+      let tableRow = $.tr();
+      tableRow.appendChild($.th(rowNum));
+
+      colNames.forEach(colName => {
+        tableRow.append(this.makeCell(colName, rowNum));
+      })
+
+      this.tableElement.append(tableRow);
+    }
   }
 
-  cell.append(input);
-  let div = $.div(`_${cellId}`);
-  cell.append(div);
+  makeCell(col, row) {
+    let cell = $.td();
+    let cellId = `${col}${row}`
 
-  return cell;
+    let input = $.input(cellId);
+    input.id = cellId;
+
+    // save input data
+    input.onchange = input.oninput = input.onpaste = function() {
+      this.inputs[cellId] = input.value;
+      this.recalculate();
+    }
+
+    input.onkeydown = function(event) {
+      let id;
+      switch (event.key) {
+        case "ArrowUp":
+          id = `#${col}${row-1}`;
+          break;
+        case "ArrowDown":
+        case "Enter":
+          id = `#${col}${row+1}`;
+          break;
+        default:
+          return;
+      }
+      $.focus(id);
+    }
+
+    cell.append(input);
+    let div = $.div(`_${cellId}`);
+    cell.append(div);
+
+    return cell;
+  }
 }
