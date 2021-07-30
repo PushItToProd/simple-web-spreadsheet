@@ -48,8 +48,7 @@
       input.value = "" + $scope.sheet[coord];
       // set the parent element class if it has a formula
       input.parentElement.setAttribute(
-        "class",
-        /^=/.exec(input.value[0]) ? "formula" : ""
+        "class", isFormula(input.value) ? "formula" : ""
       );
     });
 
