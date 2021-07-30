@@ -115,7 +115,7 @@ export class Sheetable {
 
       let val = vals[coord];
 
-      // if there's an error for the cell, set its value and move on
+      // if there's an error for the cell, display it and move on
       if (val.error) {
         div.className = "error";
         div.textContent = val.error;
@@ -123,11 +123,10 @@ export class Sheetable {
       }
 
       div.className = "";
-      div.textContent = vals[coord];
-
       if (typeof vals[coord] === 'string') {
         div.className = "text";
       }
+      div.textContent = vals[coord];
     }
   }
 
