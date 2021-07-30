@@ -34,7 +34,7 @@ self.onmessage = function (message) {
 
         // Evaluate formula cells
         try {
-          vals[coord] = eval.call(null, x.slice(1));
+          vals[coord] = eval(x.slice(1));
         } catch (e) {
           console.log("Evaluating", coord, "failed with", e);
           // Handle reference errors
