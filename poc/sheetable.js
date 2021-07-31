@@ -190,19 +190,22 @@ export class Sheetable {
       this.recalc();
     }
 
-    input.onkeydown = function(event) {
+    input.onkeydown = (event) => {
       let id;
+      console.log("input keydown - key:", event.key);
       switch (event.key) {
         case "ArrowUp":
-          id = `#${col}${row-1}`;
+          id = this.cellInputId(`${col}${row-1}`);
           break;
         case "ArrowDown":
         case "Enter":
-          id = `#${col}${row+1}`;
+          id = this.cellInputId(`${col}${row+1}`);
           break;
         default:
           return;
       }
+      id = `#${id}`;
+      console.log("input keydown - destination:", id);
       $.focus(id);
     }
 
