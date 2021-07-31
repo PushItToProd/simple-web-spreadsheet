@@ -183,7 +183,6 @@ export class Sheetable {
     let cellId = `${col}${row}`
 
     let input = $.input(this.cellInputId(cellId));
-    input.id = cellId;
 
     // save input data
     input.onchange = input.oninput = input.onpaste = () => {
