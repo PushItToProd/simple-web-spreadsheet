@@ -119,7 +119,7 @@ export class Sheetable {
       let val = vals[coord];
 
       // if there's an error for the cell, display it and move on
-      if (val.error) {
+      if (val?.error) {
         div.className = "error";
         div.textContent = val.error;
         continue;
