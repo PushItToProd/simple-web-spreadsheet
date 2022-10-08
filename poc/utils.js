@@ -6,5 +6,5 @@ export function getType(o) {
 }
 
 export function isString(o) {
-  return getType(o) === "String";
+  return typeof o === 'string' || o instanceof String;
 }
