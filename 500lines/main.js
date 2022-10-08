@@ -130,9 +130,6 @@
         }
 
         input.onchange = input.oninput = input.onpaste = function() {
-          if (row == 21) {
-            debugger;
-          }
           $scope.sheet[col + row] = input.value;
           calc();
         }
