@@ -8,3 +8,10 @@ export function getType(o) {
 export function isString(o) {
   return typeof o === 'string' || o instanceof String;
 }
+
+export function isNumeric(o) {
+  if (typeof o === 'boolean') {
+    return false;
+  }
+  return !Number.isNaN(+o);
+}

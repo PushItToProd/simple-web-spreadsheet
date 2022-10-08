@@ -142,10 +142,16 @@ export class Sheetable {
       }
 
       div.className = "";
-      if (typeof vals[coord] === 'string') {
+      if (utils.isString(val)) {
         div.className = "text";
       }
-      div.textContent = vals[coord];
+      if (!utils.isString(val) && !utils.isNumeric(val)) {
+        val = JSON.stringify(val);
+        if (val === '{}') {
+          val = String(vals[coord]);
+        }
+      }
+      div.textContent = val;
     }
   }
 

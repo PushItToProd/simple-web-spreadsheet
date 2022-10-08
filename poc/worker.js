@@ -35,7 +35,7 @@ function FormulaScope(vals, sheet) {
   // math.js has some magic checks based on special attributes. We want to throw
   // ReferenceError for undefined variables, but if we do that for these,
   // math.js will fail, so we return undefined for these instead.
-  const ignoredKeys = {set: true, get: true, keys: true, has: true};
+  const ignoredKeys = {set: true, get: true, keys: true, has: true, errs: true};
 
   return new Proxy(
     {
@@ -69,16 +69,15 @@ function FormulaScope(vals, sheet) {
           return vals[key] = value(sheet[key]);
         }
 
-        vals[key] = NaN;
+        vals[key] = NaN;  // prevent recursion
 
         let formula = sheet[key].slice(1);
 
         try {
           vals[key] = math.evaluate(formula, receiver);
-          errs[key] = undefined;
         } catch (e) {
           vals[key] = NaN;
-          errs[key] = e.toString();
+          throw e;
         }
 
         // FIXME maybe don't do this, actually
