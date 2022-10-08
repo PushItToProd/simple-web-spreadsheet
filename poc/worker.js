@@ -43,23 +43,23 @@ function FormulaScope(vals, sheet) {
         let vals = obj.vals;
         let sheet = obj.sheet;
 
+        // return already-computed values
         if (key in vals) {
-          // return already-computed values
           return vals[key];
         }
 
+        // don't compute undefined keys
         if (!(key in sheet)) {
-          // don't compute undefined keys
           // throw ReferenceError(`${key} is not defined`);
           return undefined;
         }
 
-        vals[key] = NaN;
-
+        // return non-formula values verbatim
         if (sheet[key][0] !== '=') {
-          // not a formula -> just return it
           return vals[key] = value(sheet[key]);
         }
+
+        vals[key] = NaN;
 
         let formula = sheet[key].slice(1);
 
@@ -71,12 +71,17 @@ function FormulaScope(vals, sheet) {
           errs[key] = e.toString();
         }
 
+        // FIXME maybe don't do this, actually
         return stringify(vals[key]);
       }
     }
   )
 }
 
+// stringify (badly named) coerces the value to a string if it's not a boolean
+// or number. I can't remember why I implemented this. I guess it could be a
+// security thing or maybe it's just something I thought was a good idea.
+// XXX consider removing this
 function stringify(val) {
   switch (typeof val) {
     case "boolean":
@@ -86,9 +91,11 @@ function stringify(val) {
   return val + "";
 }
 
+// value tries to coerce a value to a number, otherwise returning the value
+// as-is if coercion fails.
 function value(n) {
-  let x = +n;
-  if (n !== x.toString())
+  let x = +n;  // XXX this will coerce booleans to 1 and 0
+  if (n !== x.toString())   // FIXME use Number.isNaN here instead
     return n;
   return x;
 }

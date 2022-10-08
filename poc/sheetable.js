@@ -1,11 +1,15 @@
 import * as utils from './utils.js';
 import * as $ from './html.js';
 
+// helper for turning a numeric column index into a letter column name, so
+// columnName(0) = 'A', columnName(1) = 'B', and so on
 function columnName(i) {
   const A = 'A'.charCodeAt(0);
   return String.fromCharCode(A + i);  // TODO: handle i>= 26
 }
 
+// TimedWorker creates a web worker with a timeout to keep it from running
+// forever.
 class TimedWorker {
   WORKER_SCRIPT = "worker.js"
   TIMEOUT = 100;
@@ -17,7 +21,8 @@ class TimedWorker {
     this.timeout = this.TIMEOUT;
   }
 
-  // initialize the worker object
+  // initWorker creates the worker, sets its callback, and sends the first
+  // message.
   initWorker(callback) {
     // don't initialize if the worker is still there
     if (this.worker) return;
@@ -26,37 +31,48 @@ class TimedWorker {
     this.worker.postMessage(null);
   }
 
-  // kill the worker and reinitialize it
+  // killWorker terminates the worker and reinitializes it.
   killWorker() {
     this.worker.terminate();
     this.worker = null;
     this.initWorker();
   }
 
+  // send sends a message to the worker, optionally with a custom callback to
+  // use instead of the default.
   send(message, callback = null) {
+    // use default callback if none was provided
     if (callback === null) {
       callback = this.callback;
     }
 
+    // callback for killing the worker on timeout
     let timeoutCallback = () => {
       console.warn("TimedWorker timed out - killing it")
       this.killWorker();
       this.timeoutCallback(message);
     }
 
-    let timer;
+    let timer;  // variable holding the timeout handle
+
+    // response callback
     this.worker.onmessage = (message) => {
       console.info("TimedWorker responded - triggering callback")
       clearTimeout(timer);
       callback(message);
     }
+
+    // set up timeout
     if (this.timeout && this.timeout > 0) {
       timer = setTimeout(timeoutCallback, this.timeout);
     }
+
+    // send the message
     this.worker.postMessage(message);
   }
 }
 
+// Sheetable takes a table HTML element and builds a spreadsheet inside it.
 export class Sheetable {
   // have to use a function because if we do
   //    function (options = Defaults)
