@@ -85,7 +85,7 @@ export class Sheetable {
     }
   }
 
-  constructor(tableElement, options = {}, inputs = {}) {
+  constructor(tableElement, options = {}, values = {}) {
     if (!(tableElement instanceof HTMLTableElement)) {
       throw `Sheetable expects an HTMLTableElement but got ` +
         `${tableElement} of type ${utils.getType(tableElement)}`;
@@ -93,7 +93,7 @@ export class Sheetable {
 
     this.tableElement = tableElement;
     this.options = Object.assign(this.getDefaults(), options);
-    this.inputs = inputs;
+    this.values = values;
 
     // startup - start the worker and fill the table
     this.fillTable();
@@ -104,7 +104,7 @@ export class Sheetable {
       (message) => {this.workerTimeout(message)},
       // post-init callback
       () => {
-        this.worker.send(this.inputs);
+        this.worker.send(this.values);
       }
     );
   }
@@ -112,7 +112,7 @@ export class Sheetable {
   // trigger the worker to recalculate the values -- upon success,
   // workerCallback will be triggered
   recalc() {
-    this.worker.send(this.inputs);
+    this.worker.send(this.values);
   }
 
   workerTimeout() {
@@ -150,7 +150,7 @@ export class Sheetable {
   }
 
   reset() {
-    this.inputs = {};
+    this.values = {};
     let element;
     for (element of this.tableElement.getElementsByTagName("input")) {
       element.value = "";
@@ -200,9 +200,13 @@ export class Sheetable {
 
     let input = $.input(this.cellInputId(cellId));
 
+    if (!(cellId in this.values)) {
+      this.values[cellId] = undefined;
+    }
+
     // save input data
-    input.onchange = input.oninput = input.onpaste = () => {
-      this.inputs[cellId] = input.value;
+    input.onchange = () => {
+      this.values[cellId] = input.value;
       this.recalc();
     }
 

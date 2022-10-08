@@ -8,7 +8,7 @@ self.onmessage = function(message) {
   for (let coord in sheet) {
     let sheetVal = sheet[coord];
 
-    if (sheetVal[0] !== '=') {
+    if (!(typeof sheetVal === 'string' || sheetVal instanceof String) || sheetVal[0] !== '=') {
       vals[coord] = value(sheetVal);
       continue;
     }
@@ -19,6 +19,8 @@ self.onmessage = function(message) {
       vals[coord] = math.evaluate(formula, scope);
     } catch (e) {
       console.error("eval failed at coordinate", coord, "with error", e);
+      console.debug("current sheet:", sheet);
+      console.debug("current vals:", vals);
       vals[coord] = {error: e.toString()};
     }
   }
@@ -30,6 +32,11 @@ self.onmessage = function(message) {
 // values. this gets passed to math.evaluate() so mathjs will use this to get
 // all variable values
 function FormulaScope(vals, sheet) {
+  // math.js has some magic checks based on special attributes. We want to throw
+  // ReferenceError for undefined variables, but if we do that for these,
+  // math.js will fail, so we return undefined for these instead.
+  const ignoredKeys = {set: true, get: true, keys: true, has: true};
+
   return new Proxy(
     {
       vals: vals,
@@ -48,10 +55,13 @@ function FormulaScope(vals, sheet) {
           return vals[key];
         }
 
-        // don't compute undefined keys
-        if (!(key in sheet)) {
-          // throw ReferenceError(`${key} is not defined`);
+        if (ignoredKeys[key]) {
           return undefined;
+        }
+
+        // don't compute undefined keys
+        if (!(key in sheet) || sheet[key] === undefined) {
+          throw ReferenceError(`${key} is not defined`);
         }
 
         // return non-formula values verbatim
@@ -72,7 +82,7 @@ function FormulaScope(vals, sheet) {
         }
 
         // FIXME maybe don't do this, actually
-        return stringify(vals[key]);
+        return vals[key];
       }
     }
   )
@@ -91,11 +101,14 @@ function stringify(val) {
   return val + "";
 }
 
-// value tries to coerce a value to a number, otherwise returning the value
-// as-is if coercion fails.
-function value(n) {
-  let x = +n;  // XXX this will coerce booleans to 1 and 0
-  if (n !== x.toString())   // FIXME use Number.isNaN here instead
-    return n;
-  return x;
+// value tries to coerce a string value to a number, otherwise returning the
+// value as-is if it's not a number or if coercion fails.
+function value(val) {
+  if (!(typeof val === 'string' || val instanceof String)) {
+    return val;
+  }
+  let n = +val;
+  if (Number.isNaN(n))
+    return val;
+  return n;
 }
