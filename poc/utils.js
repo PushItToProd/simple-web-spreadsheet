@@ -10,7 +10,9 @@ export function isString(o) {
 }
 
 export function isNumeric(o) {
-  if (typeof o === 'boolean') {
+  // exclude booleans and objects here because the + operator will coerce
+  // booleans and single value arrays to numbers
+  if (typeof o === 'boolean' || typeof o === 'object') {
     return false;
   }
   return !Number.isNaN(+o);

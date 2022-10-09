@@ -145,14 +145,32 @@ export class Sheetable {
       if (utils.isString(val)) {
         div.className = "text";
       }
-      if (!utils.isString(val) && !utils.isNumeric(val)) {
-        val = JSON.stringify(val);
-        if (val === '{}') {
-          val = String(vals[coord]);
-        }
-      }
-      div.textContent = val;
+      div.textContent = this.formatText(val);
     }
+  }
+
+  formatText(val) {
+    if (val === undefined) {
+      return '';
+    }
+    if (utils.isString(val) || utils.isNumeric(val)) {
+      return val;
+    }
+    if ('_data' in val) {
+      return this.formatText(val._data);
+    }
+    if (Array.isArray(val)) {
+      return JSON.stringify(val);
+    }
+    let text = '';
+    if (val.constructor?.name) {
+      text = text.concat(val.constructor.name).concat(' ');
+    }
+    let json = `${JSON.stringify(val)}`;
+    if (json !== '{}') {
+      return text.concat(json);
+    }
+    return text.concat(String(val));
   }
 
   reset() {
@@ -210,7 +228,7 @@ export class Sheetable {
       this.values[cellId] = undefined;
     }
 
-    // save input data
+    // save input data and recalculate
     input.onchange = () => {
       this.values[cellId] = input.value;
       this.recalc();
@@ -237,6 +255,9 @@ export class Sheetable {
 
     cell.append(input);
     let div = $.div(this.cellDivId(cellId));
+    div.addEventListener('click', event => {
+      input.focus();
+    });
     cell.append(div);
 
     return cell;
