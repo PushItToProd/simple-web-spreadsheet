@@ -225,7 +225,7 @@ export class Sheetable {
   fillTable({numRows, numCols} = this.options) {
     let tableHeader = $.tr();
     let resetButton = $.button("↻");
-    resetButton.onclick = this.reset.bind(this);
+    resetButton.onclick = () => this.reset();
     tableHeader.append(resetButton);
     this.tableElement.append(tableHeader);
 
@@ -265,8 +265,14 @@ export class Sheetable {
 
     let input = $.input(this.cellInputId(cellId));
 
-    if (!(cellId in this.values)) {
-      this.values[cellId] = undefined;
+    let val;
+    if (cellId in this.values) {
+      val = this.values[cellId];
+    } else {
+      val = this.values[cellId] = undefined;
+    }
+    if (val !== undefined) {
+      input.value = val;
     }
 
     // save input data and recalculate
