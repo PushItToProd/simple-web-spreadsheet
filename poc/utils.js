@@ -26,3 +26,11 @@ export function isObject(o) {
 export function objectIsEmpty(o) {
   return isObject(o) && Object.keys(o).length === 0;
 }
+
+export function isBoolean(o) {
+  return typeof o === 'boolean';
+}
+
+export function isPrimitive(val) {
+  return val === null || (typeof val !== 'object' && typeof val !== 'array' && typeof val !== 'function');
+}

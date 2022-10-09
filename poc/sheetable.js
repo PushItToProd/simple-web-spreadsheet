@@ -187,10 +187,12 @@ export class Sheetable {
   }
 
   formatText(val) {
-    if (val === undefined || val === '') {
+    if (val === null || val === undefined || val === '') {
       return '';
     }
-    if (utils.isString(val) || utils.isNumeric(val)) {
+
+    // return primitive values verbatim
+    if (utils.isPrimitive(val)) {
       return val;
     }
     if ('_data' in val) {
