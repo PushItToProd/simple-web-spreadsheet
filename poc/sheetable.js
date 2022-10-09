@@ -161,7 +161,7 @@ export class Sheetable {
     }
     let text = '';
     // prepend constructor name
-    if (val.constructor?.name && !Array.isArray(val)) {
+    if (val.constructor?.name && !Array.isArray(val) && !utils.isObject(val)) {
       text = text.concat(val.constructor.name).concat(' ');
     }
     let json = `${JSON.stringify(val)}`;
