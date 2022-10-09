@@ -59,7 +59,6 @@ class TimedWorker {
 
     // response callback
     this.worker.onmessage = (message) => {
-      console.info("TimedWorker responded - triggering callback")
       clearTimeout(timer);
       callback(message);
     }
