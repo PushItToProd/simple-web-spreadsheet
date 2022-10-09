@@ -159,11 +159,9 @@ export class Sheetable {
     if ('_data' in val) {
       return this.formatText(val._data);
     }
-    if (Array.isArray(val)) {
-      return JSON.stringify(val);
-    }
     let text = '';
-    if (val.constructor?.name) {
+    // prepend constructor name
+    if (val.constructor?.name && !Array.isArray(val)) {
       text = text.concat(val.constructor.name).concat(' ');
     }
     let json = `${JSON.stringify(val)}`;
