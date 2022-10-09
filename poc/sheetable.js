@@ -150,7 +150,7 @@ export class Sheetable {
   }
 
   formatText(val) {
-    if (val === undefined) {
+    if (val === undefined || val === '') {
       return '';
     }
     if (utils.isString(val) || utils.isNumeric(val)) {

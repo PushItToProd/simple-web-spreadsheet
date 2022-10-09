@@ -106,6 +106,9 @@ function value(val) {
   if (!(typeof val === 'string' || val instanceof String)) {
     return val;
   }
+  if (val === "") {
+    return val;
+  }
   let n = +val;
   if (Number.isNaN(n))
     return val;
