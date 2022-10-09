@@ -100,12 +100,11 @@ export class Sheetable {
     // startup - start the worker and fill the table
     this.fillTable();
     this.worker = new TimedWorker(
-      // These callbacks are wrapped with functions so `this` will be bound in
-      // the function scope. Alternatively, we could bind each method like
-      // `this.workerCallback.bind(this)`.
-      message => this.workerCallback(message),  // success callback
-      message => this.workerTimeout(message),   // timeout callback
-      () => this.recalc()                       // post-init callback
+      // We have to explicitly bind these methods to `this` or `this` will be
+      // unitialized in their scope when they're called.
+      this.workerCallback.bind(this),
+      this.workerTimeout.bind(this),
+      this.recalc.bind(this),
     );
   }
 
