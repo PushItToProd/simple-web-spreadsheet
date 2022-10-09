@@ -15,12 +15,13 @@ const doNothing = _ => null;
 class TimedWorker {
   WORKER_SCRIPT = "worker.js"
   TIMEOUT = 100;
-  constructor(callback, timeoutCallback = doNothing, initCallback = doNothing) {
+  constructor(callback, timeoutCallback = doNothing, initCallback = doNothing,
+              timeout = this.TIMEOUT) {
     this.initWorker(initCallback);
 
     this.callback = callback;
     this.timeoutCallback = timeoutCallback || doNothing;
-    this.timeout = this.TIMEOUT;
+    this.timeout = timeout;
   }
 
   // initWorker creates the worker, sets its callback, and sends the first
