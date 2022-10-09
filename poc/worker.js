@@ -1,5 +1,13 @@
 self.importScripts("math.js");
 
+function isString(o) {
+  return typeof o === 'string' || o instanceof String;
+}
+
+function isFormula(val) {
+  return isString(val) && val[0] === '=';
+}
+
 self.onmessage = function(message) {
   let sheet = message.data || {};
   let vals = {};
@@ -8,8 +16,7 @@ self.onmessage = function(message) {
   for (let coord in sheet) {
     let sheetVal = sheet[coord];
 
-    if (!(typeof sheetVal === 'string' || sheetVal instanceof String) || sheetVal[0] !== '=') {
-      vals[coord] = value(sheetVal);
+    if (!isFormula(sheetVal)) {
       continue;
     }
 
@@ -36,6 +43,15 @@ function FormulaScope(vals, sheet) {
   // ReferenceError for undefined variables, but if we do that for these,
   // math.js will fail, so we return undefined for these instead.
   const ignoredKeys = {set: true, get: true, keys: true, has: true, errs: true};
+
+  // pre-populate non-formula values
+  for (let coord in sheet) {
+    let val = sheet[coord];
+
+    if (!isFormula(val)) {
+      vals[coord] = value(val);
+    }
+  }
 
   return new Proxy(
     {
