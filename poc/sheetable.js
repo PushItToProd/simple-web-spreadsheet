@@ -8,16 +8,18 @@ function columnName(i) {
   return String.fromCharCode(A + i);  // TODO: handle i>= 26
 }
 
+const doNothing = _ => null;
+
 // TimedWorker creates a web worker with a timeout to keep it from running
 // forever.
 class TimedWorker {
   WORKER_SCRIPT = "worker.js"
   TIMEOUT = 100;
-  constructor(callback, timeoutCallback = _ => {}, initCallback = _ => {}) {
+  constructor(callback, timeoutCallback = doNothing, initCallback = doNothing) {
     this.initWorker(initCallback);
 
     this.callback = callback;
-    this.timeoutCallback = timeoutCallback || (_ => {});
+    this.timeoutCallback = timeoutCallback || doNothing;
     this.timeout = this.TIMEOUT;
   }
 
