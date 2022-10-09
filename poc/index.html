@@ -8,12 +8,29 @@
   <title>Sheetable - Web Spreadsheets POC</title>
 
   <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <table id="spreadsheet"></table>
+  <div id="errorMsg"></div>
+
+  <script>
+    window.onerror = function(event, source, line, col, error) {
+      // FIXME pretty sure this introduces an XSS vulnerability. If the user
+      // could get some HTML into the error string, that would probably be
+      // rendered here.
+      document.getElementById("errorMsg").innerHTML = `
+        <b>Error!</b><br/>
+        Source: ${source}<br/>
+        Line: ${line}<br/>
+        Col: ${col}<br/>
+        Error: ${error}
+      `;
+    }
+  </script>
+
   <script type="module">
     import {Sheetable} from './sheetable.js';
     let sheet = new Sheetable(document.getElementById('spreadsheet'));
   </script>
-</head>
-<body>
-  <table id="spreadsheet"></table>
 </body>
 </html>
