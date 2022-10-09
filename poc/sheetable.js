@@ -8,7 +8,9 @@ function columnName(i) {
   return String.fromCharCode(A + i);  // TODO: handle i>= 26
 }
 
-const doNothing = _ => null;
+// doNothing is a void function that just returns null, so we can use it as a
+// default callback instead of passing null and checking it each time.
+const doNothing = () => null;
 
 // TimedWorker creates a web worker with a timeout to keep it from running
 // forever.
