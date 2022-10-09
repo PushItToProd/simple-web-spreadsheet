@@ -60,8 +60,12 @@ function FormulaScope(vals, sheet) {
         }
 
         // don't compute undefined keys
-        if (!(key in sheet) || sheet[key] === undefined) {
+        if (!(key in sheet)) {
           throw ReferenceError(`${key} is not defined`);
+        }
+
+        if (sheet[key] === undefined || sheet[key] === '') {
+          throw ReferenceError(`${key} is empty`)
         }
 
         // return non-formula values verbatim
