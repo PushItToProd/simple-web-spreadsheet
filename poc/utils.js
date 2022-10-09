@@ -20,8 +20,5 @@ export function isNumeric(o) {
 
 // isObject checks if an object is a pure object, not a class or anything
 export function isObject(o) {
-  return o !== null
-    && typeof o === 'object'
-    && !Array.isArray(o)
-    && o?.constructor === Object
+  return o?.constructor === Object
 }
