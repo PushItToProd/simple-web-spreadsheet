@@ -234,7 +234,6 @@ export class Sheetable {
 
     input.onkeydown = (event) => {
       let id;
-      console.log("input keydown - key:", event.key);
       switch (event.key) {
         case "ArrowUp":
           id = this.cellInputId(`${col}${row-1}`);
@@ -247,7 +246,6 @@ export class Sheetable {
           return;
       }
       id = `#${id}`;
-      console.log("input keydown - destination:", id);
       $.focus(id);
     }
 
