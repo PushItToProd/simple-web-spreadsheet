@@ -22,3 +22,7 @@ export function isNumeric(o) {
 export function isObject(o) {
   return o?.constructor === Object
 }
+
+export function objectIsEmpty(o) {
+  return isObject(o) && Object.keys(o).length === 0;
+}

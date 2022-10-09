@@ -73,6 +73,33 @@ class TimedWorker {
   }
 }
 
+const StorageManager = {
+  STORAGE_KEY: "sheetData",
+  load() {
+    let json = localStorage.getItem(this.STORAGE_KEY);
+    if (json == null) {
+      return null;
+    }
+    try {
+      return JSON.parse(json);
+    } catch (e) {
+      console.error("error parsing JSON from local storage", e);
+      return null;
+    }
+  },
+  save(data) {
+    let json;
+    console.debug("Saving data to local storage", data);
+    try {
+      json = JSON.stringify(data);
+    } catch (e) {
+      console.error("error stringifying JSON for local storage", e);
+      throw e;
+    }
+    localStorage.setItem(this.STORAGE_KEY, json);
+  }
+}
+
 // Sheetable takes a table HTML element and builds a spreadsheet inside it.
 export class Sheetable {
   // have to use a function because if we do
@@ -86,7 +113,8 @@ export class Sheetable {
     }
   }
 
-  constructor(tableElement, options = {}, values = {}) {
+  constructor(tableElement, options = {}, values = null,
+              storageManager = StorageManager) {
     if (!(tableElement instanceof HTMLTableElement)) {
       throw `Sheetable expects an HTMLTableElement but got ` +
         `${tableElement} of type ${utils.getType(tableElement)}`;
@@ -94,7 +122,15 @@ export class Sheetable {
 
     this.tableElement = tableElement;
     this.options = Object.assign(this.getDefaults(), options);
-    this.values = values;
+    this.storageManager = storageManager;
+    if (values !== null) {
+      this.values = values;
+    } else {
+      this.values = this.storageManager.load();
+      if (this.values == null) {
+        this.values = {};
+      }
+    }
 
     // startup - start the worker and fill the table
     this.fillTable();
@@ -169,8 +205,9 @@ export class Sheetable {
     return text.concat(String(val));
   }
 
-  reset() {
-    this.values = {};
+  reset(data = null) {
+    this.values = data ?? {};
+    this.storageManager.save(this.values);
     let element;
     for (element of this.tableElement.getElementsByTagName("input")) {
       element.value = "";
@@ -185,9 +222,7 @@ export class Sheetable {
   fillTable({numRows, numCols} = this.options) {
     let tableHeader = $.tr();
     let resetButton = $.button("↻");
-    resetButton.onclick = function() {
-      alert('TODO')
-    }
+    resetButton.onclick = this.reset.bind(this);
     tableHeader.append(resetButton);
     this.tableElement.append(tableHeader);
 
@@ -214,6 +249,13 @@ export class Sheetable {
     }
   }
 
+  update(cellId, value) {
+    console.debug("updating %s with value %s", cellId, value);
+    this.values[cellId] = value;
+    this.recalc();
+    this.storageManager.save(this.values);
+  }
+
   makeCell(col, row) {
     let cell = $.td();
     let cellId = `${col}${row}`
@@ -226,8 +268,7 @@ export class Sheetable {
 
     // save input data and recalculate
     input.onchange = () => {
-      this.values[cellId] = input.value;
-      this.recalc();
+      this.update(cellId, input.value);
     }
 
     input.onkeydown = (event) => {
