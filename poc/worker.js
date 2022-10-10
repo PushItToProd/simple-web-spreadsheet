@@ -92,23 +92,32 @@ const Pending = Symbol("Pending");
 // values of formula inputs for the spreadsheet. It is passed to math.evaluat()
 // as the scope parameter to allow spreadsheet-style dyanmic computation.
 function FormulaScope(sheet) {
-  let vals = {};
+  let vals = {};  // computation results
+  let vars = {};  // dynamically assigned values
   // Math.js expects Map objects to implement the methods set(), get(), has(),
   // and keys().
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
   return {
     vals,
     sheet,
+    vars,
     set(key, value) {
-      throw `assignment is forbidden`
+      if (key in sheet) {
+        throw `Error: cannot assign to reserved key ${key}`
+      }
+      vars[key] = value;
     },
     keys() {
-      return Object.keys(sheet);
+      return Object.keys(sheet).concat(Object.keys(vars));
     },
     has(key) {
-      return key in sheet
+      return key in sheet || key in vars;
     },
     get(key) {
+      // return defined variables
+      if (key in vars) {
+        return vars[key];
+      }
       // return already-computed values
       if (key in vals) {
         let val = vals[key];
