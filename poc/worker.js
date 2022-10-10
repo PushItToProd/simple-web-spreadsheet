@@ -53,6 +53,9 @@ function FormulaScope(vals, sheet) {
   // math.js will fail, so we return undefined for these instead.
   const ignoredKeys = {set: true, get: true, keys: true, has: true, errs: true};
 
+  // XXX math.js can accept a Map for a scope object. perhaps this would be
+  // better implemented that way.
+  // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
   return new Proxy(
     {
       vals: vals,
