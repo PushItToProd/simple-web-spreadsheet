@@ -44,6 +44,11 @@ function evalSheet(sheetVals) {
   return vals;
 }
 
+// Pending is used to denote formula values that have been requested from
+// FormulaScope but not yet evaluated with math.evaluate(). This allows
+// recursion to be detected and prevented.
+const Pending = Symbol("Pending");
+
 // quasi-contructor for a magic array object that recursively computes cell
 // values. this gets passed to math.evaluate() so mathjs will use this to get
 // all variable values
@@ -66,6 +71,10 @@ function FormulaScope(vals, sheet) {
 
         // return already-computed values
         if (key in vals) {
+          let val = vals[key];
+          if (val === Pending) {
+            return {error: `Recursion Error: ${key}`}
+          }
           return vals[key];
         }
 
@@ -84,7 +93,7 @@ function FormulaScope(vals, sheet) {
           return vals[key] = value(sheetVal);
         }
 
-        vals[key] = NaN;  // prevent recursion
+        vals[key] = Pending;  // prevent recursion
 
         let formula = sheetVal.slice(1);
 
