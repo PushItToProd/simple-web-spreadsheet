@@ -18,31 +18,30 @@ self.onmessage = function(message) {
 };
 
 function evalSheet(sheetVals) {
-  // XXX vals should probably be local to FormulaScope
-  let vals = {};
-  let scope = FormulaScope(vals, sheetVals);
+  let scope = FormulaScope(sheetVals);
 
   for (let coord in sheetVals) {
     let sheetVal = sheetVals[coord];
 
     if (!isFormula(sheetVal)) {
-      vals[coord] = value(sheetVal);
+      // XXX remove need to introspect this
+      scope.vals[coord] = value(sheetVal);
       continue;
     }
 
     try {
-      vals[coord] = scope.get(coord);
+      scope.get(coord);
     } catch (e) {
       console.error("eval failed at coordinate", coord, "with error", e);
       console.debug("current sheet:", sheetVals);
-      console.debug("current vals:", vals);
-      vals[coord] = {error: e.toString()};
+      console.debug("current vals:", scope.vals);
+      scope.vals[coord] = {error: e.toString()};
     }
   }
   console.debug("current sheet:", sheetVals);
-  console.debug("current vals:", vals);
+  console.debug("current vals:", scope.vals);
   console.debug("final FormulaScope:", scope);
-  return vals;
+  return scope.vals;
 }
 
 class RecursionError extends Error {
@@ -60,11 +59,13 @@ const Pending = Symbol("Pending");
 // FormulaScope is a Map-like object that uses math.evaluate() to compute the
 // values of formula inputs for the spreadsheet. It is passed to math.evaluat()
 // as the scope parameter to allow spreadsheet-style dyanmic computation.
-function FormulaScope(vals, sheet) {
+function FormulaScope(sheet) {
+  let vals = {};
   // Math.js expects Map objects to implement the methods set(), get(), has(),
   // and keys().
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
   return {
+    vals,
     set(key, value) {
       throw `assignment is forbidden`
     },
