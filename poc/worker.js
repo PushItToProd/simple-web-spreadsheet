@@ -29,11 +29,8 @@ function evalSheet(sheetVals) {
       continue;
     }
 
-    let formula = sheetVal.slice(1);
-
     try {
-      // FIXME don't use math.evaluate here and in FormulaScope
-      vals[coord] = math.evaluate(formula, scope);
+      vals[coord] = scope[coord];
     } catch (e) {
       console.error("eval failed at coordinate", coord, "with error", e);
       console.debug("current sheet:", sheetVals);
@@ -42,6 +39,13 @@ function evalSheet(sheetVals) {
     }
   }
   return vals;
+}
+
+class RecursionError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "RecursionError";
+  }
 }
 
 // Pending is used to denote formula values that have been requested from
@@ -73,7 +77,15 @@ function FormulaScope(vals, sheet) {
         if (key in vals) {
           let val = vals[key];
           if (val === Pending) {
-            return {error: `Recursion Error: ${key}`}
+            let error = new RecursionError(key);
+            vals[key] = error.toString();
+            throw error;
+          }
+
+          // propagate errors across cells
+          if (val?.error) {
+            // TODO create a TransitiveError class to capture this
+            throw val.error;
           }
           return vals[key];
         }
@@ -101,10 +113,7 @@ function FormulaScope(vals, sheet) {
           // FIXME don't use math.evaluate here and in evalSheet
           vals[key] = math.evaluate(formula, receiver);
         } catch (e) {
-          vals[key] = NaN;
-          console.error("eval failed at coordinate", coord, "with error", e);
-          console.debug("current sheet:", sheetVals);
-          console.debug("current vals:", vals);
+          vals[key] = {error: e.toString()};
           throw e;
         }
 
