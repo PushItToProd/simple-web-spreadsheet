@@ -22,26 +22,61 @@ function evalSheet(sheetVals) {
   let results = [];
 
   for (let coord in sheetVals) {
-    try {
-      results[coord] = scope.get(coord);
-    } catch (e) {
-      if (e.name === 'ReferenceError' && e.message === `${coord} is empty`) {
-        // if the ReferenceError is for this coordinate, then that just means
-        // cell is empty.
-        // TODO check the value above and skip this entirely
-        results[coord] = '';
-      } else {
-        console.error("eval failed at coordinate", coord, "with error", e);
-        console.debug("current sheet:", sheetVals);
-        console.debug("current vals:", scope.vals);
-        results[coord] = scope.vals[coord] = {error: e.toString()};
-      }
-    }
+    results[coord] = getResult(scope, coord);
   }
   console.debug("current sheet:", sheetVals);
   console.debug("current vals:", scope.vals);
   console.debug("final FormulaScope:", scope);
   return results;
+}
+
+// getResult turns the raw evaluated value of a cell into a format that is able
+// to be sent as a message over the pipe back to the main thread and is ready
+// for rendering on the other end. This format includes the metadata necessary
+// for rendering.
+function getResult(scope, coord) {
+  let value;
+  try {
+    value = scope.get(coord);
+  } catch (e) {
+    if (e.name === 'ReferenceError' && e.message === `${coord} is empty`) {
+      // if the ReferenceError is for this coordinate, then that just means
+      // cell is empty.
+      // TODO check the raw value directly and eliminate the need for this
+      return ''
+    }
+
+    console.error("eval failed at coordinate", coord, "with error", e);
+    console.debug("current sheet:", scope.sheet);
+    console.debug("current vals:", scope.vals);
+    return scope.vals[coord] = {type: 'error', error: e.toString()};
+  }
+
+  let type = undefined;
+
+  // TODO: math.Matrix
+  // TODO: math.Complex
+
+  if (typeof value === "string" || value instanceof String) {
+    type = 'string';
+  } else if (typeof value === "number" || typeof value === "bigint") {
+    type = 'number';
+  } else if (typeof value === "boolean") {
+    type = 'boolean';
+  } else if (typeof value === "function") {
+    return {type: 'function', value: scope.sheet[coord]}
+  } else if (Array.isArray(value)) {
+    return {type: 'array', value}
+  } else if (typeof value === "object") {
+    return {type: 'object', value}
+  }
+
+  if (type === undefined) {
+    console.error("value has unknown type", value);
+    return {type: 'error', error: 'invalid type'};
+  }
+
+  return {type, value};
 }
 
 class RecursionError extends Error {
@@ -66,6 +101,7 @@ function FormulaScope(sheet) {
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
   return {
     vals,
+    sheet,
     set(key, value) {
       throw `assignment is forbidden`
     },

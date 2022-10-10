@@ -200,6 +200,19 @@ export class Sheetable {
     if (utils.isPrimitive(val)) {
       return val;
     }
+
+    if ('type' in val) {
+      switch (val.type) {
+        case 'number':
+        case 'string':
+        case 'boolean':
+        case 'function':
+          return val.value;
+      }
+      val = val.value;
+    }
+
+    // TODO: factor this extra logic into the getResult() function in worker.js
     if ('_data' in val) {
       return this.formatText(val._data);
     }
