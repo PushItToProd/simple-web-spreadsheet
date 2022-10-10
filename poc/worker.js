@@ -73,18 +73,20 @@ function FormulaScope(vals, sheet) {
           return undefined;
         }
 
-        if (sheet[key] === undefined || sheet[key] === '') {
+        let sheetVal = sheet[key];
+
+        if (sheetVal === undefined || sheetVal === '') {
           throw ReferenceError(`${key} is empty`)
         }
 
         // return non-formula values verbatim
-        if (sheet[key][0] !== '=') {
-          return vals[key] = value(sheet[key]);
+        if (sheetVal[0] !== '=') {
+          return vals[key] = value(sheetVal);
         }
 
         vals[key] = NaN;  // prevent recursion
 
-        let formula = sheet[key].slice(1);
+        let formula = sheetVal.slice(1);
 
         try {
           // FIXME don't use math.evaluate here and in evalSheet
