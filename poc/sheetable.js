@@ -187,45 +187,26 @@ export class Sheetable {
       if (utils.isString(val)) {
         div.className = "text";
       }
-      div.textContent = this.formatText(val);
+      div.innerHTML = this.formatText(val);
     }
   }
 
   formatText(val) {
-    if (val === null || val === undefined || val === '') {
-      return '';
-    }
-
-    // return primitive values verbatim
-    if (utils.isPrimitive(val)) {
-      return val;
-    }
-
     if ('type' in val) {
       switch (val.type) {
+        case 'empty':
+          return '';
         case 'number':
         case 'string':
         case 'boolean':
         case 'function':
           return val.value;
+        case 'error':
+          return val;
+        default:
+          return {error: `Unknown type ${val.type}: ${val.value}`}
       }
-      val = val.value;
     }
-
-    // TODO: factor this extra logic into the getResult() function in worker.js
-    if ('_data' in val) {
-      return this.formatText(val._data);
-    }
-    let text = '';
-    // prepend constructor name
-    if (val.constructor?.name && !Array.isArray(val) && !utils.isObject(val)) {
-      text = text.concat(val.constructor.name).concat(' ');
-    }
-    let json = `${JSON.stringify(val)}`;
-    if (json !== '{}') {
-      return text.concat(json);
-    }
-    return text.concat(String(val));
   }
 
   reset(data = null) {

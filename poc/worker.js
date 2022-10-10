@@ -36,16 +36,13 @@ function evalSheet(sheetVals) {
 // for rendering.
 function getResult(scope, coord) {
   let value;
+  //
+  if (!scope.sheet[coord]) {
+    return {type: 'empty'};
+  }
   try {
     value = scope.get(coord);
   } catch (e) {
-    if (e.name === 'ReferenceError' && e.message === `${coord} is empty`) {
-      // if the ReferenceError is for this coordinate, then that just means
-      // cell is empty.
-      // TODO check the raw value directly and eliminate the need for this
-      return ''
-    }
-
     console.error("eval failed at coordinate", coord, "with error", e);
     console.debug("current sheet:", scope.sheet);
     console.debug("current vals:", scope.vals);
