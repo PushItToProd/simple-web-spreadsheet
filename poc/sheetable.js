@@ -173,11 +173,12 @@ export class Sheetable {
         console.warn("no <div> for", coord, "with id", divId);
         continue;
       }
+      let td = div.parentElement;
 
       let val = vals[coord];
 
       div.innerText = "";
-      div.className = "";
+      td.className = "";
 
       if (val === undefined) {
         continue;
@@ -185,7 +186,7 @@ export class Sheetable {
 
       // if there's an error for the cell, display it and move on
       if (val?.error) {
-        div.className = "error";
+        td.className = "error";
         div.textContent = val.error;
         continue;
       }
@@ -196,28 +197,28 @@ export class Sheetable {
         switch (val.type) {
           case 'empty':
             div.innerText = "";
-            div.className = "empty";
+            td.className = "empty";
             break;
           case 'number':
             break;
           case 'string':
-            div.className = "text";
+            td.className = "text";
             div.innerText = val.value;
             break;
           case 'boolean':
-            div.className = "boolean";
+            td.className = "boolean";
             div.innerText = val.value ? "TRUE" : "FALSE";
             break;
           case 'function':
-            div.className = "function";
+            td.className = "function";
             div.innerText = val.value;
             break;
           case 'error':
-            div.className = "error";
+            td.className = "error";
             div.textContent = val.error;
             break;
           default:
-            div.className = "error";
+            td.className = "error";
             div.textContent = `Unknown type ${val.type}: ${val.value}`;
         }
       }

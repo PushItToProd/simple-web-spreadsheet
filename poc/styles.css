@@ -33,9 +33,7 @@ td {
 th {
   background: #ddd;
 }
-td.formula {
-  background: #eef;
-}
+
 td div {
   text-align: right;
   width: 120px;
@@ -43,15 +41,29 @@ td div {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-div.text {
+td.formula {
+  background: #eef;
+}
+td.text div {
   text-align: left;
 }
-div.error {
+td.error div {
   text-align: center;
   color: #800;
   font-size: 90%;
   border: solid 1px #800;
 }
+td.boolean div {
+  text-align: center;
+}
+td.function div {
+  font-family: monospace;
+  text-align: left;
+}
+td.function {
+  background-color: rgba(0%, 0%, 0%,  7%);
+}
+
 input {
   position: absolute;
   border: 0;
