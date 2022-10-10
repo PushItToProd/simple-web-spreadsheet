@@ -18,15 +18,14 @@ self.onmessage = function(message) {
 };
 
 function evalSheet(sheetVals) {
+  console.debug("evaluating sheet:", sheetVals);
   let scope = FormulaScope(sheetVals);
   let results = [];
 
   for (let coord in sheetVals) {
     results[coord] = getResult(scope, coord);
   }
-  console.debug("current sheet:", sheetVals);
-  console.debug("current vals:", scope.vals);
-  console.debug("final FormulaScope:", scope);
+  console.debug("evaluated scope:", scope);
   return results;
 }
 
@@ -44,8 +43,6 @@ function getResult(scope, coord) {
     value = scope.get(coord);
   } catch (e) {
     console.error("eval failed at coordinate", coord, "with error", e);
-    console.debug("current sheet:", scope.sheet);
-    console.debug("current vals:", scope.vals);
     return scope.vals[coord] = {type: 'error', error: e.toString()};
   }
 
