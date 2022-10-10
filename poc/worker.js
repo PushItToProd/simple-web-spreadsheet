@@ -9,32 +9,40 @@ function isFormula(val) {
 }
 
 self.onmessage = function(message) {
-  let sheet = message.data || {};
-  let vals = {};
-  let scope = FormulaScope(vals, sheet);
+  let sheetVals = message.data || {};
 
-  for (let coord in sheet) {
-    let sheetVal = sheet[coord];
+  let vals = evalSheet(sheetVals);
+
+  // send the computed values back to the main thread
+  postMessage({vals});
+};
+
+function evalSheet(sheetVals) {
+  let vals = {};
+  let scope = FormulaScope(vals, sheetVals);
+
+  for (let coord in sheetVals) {
+    let sheetVal = sheetVals[coord];
 
     if (!isFormula(sheetVal)) {
+      vals[coord] = value(sheetVal);
       continue;
     }
 
     let formula = sheetVal.slice(1);
 
     try {
+      // FIXME don't use math.evaluate here and in FormulaScope
       vals[coord] = math.evaluate(formula, scope);
     } catch (e) {
       console.error("eval failed at coordinate", coord, "with error", e);
-      console.debug("current sheet:", sheet);
+      console.debug("current sheet:", sheetVals);
       console.debug("current vals:", vals);
       vals[coord] = {error: e.toString()};
     }
   }
-
-  // send the computed values back to the main thread
-  postMessage({vals});
-};
+  return vals;
+}
 
 // quasi-contructor for a magic array object that recursively computes cell
 // values. this gets passed to math.evaluate() so mathjs will use this to get
@@ -44,15 +52,6 @@ function FormulaScope(vals, sheet) {
   // ReferenceError for undefined variables, but if we do that for these,
   // math.js will fail, so we return undefined for these instead.
   const ignoredKeys = {set: true, get: true, keys: true, has: true, errs: true};
-
-  // pre-populate non-formula values
-  for (let coord in sheet) {
-    let val = sheet[coord];
-
-    if (!isFormula(val)) {
-      vals[coord] = value(val);
-    }
-  }
 
   return new Proxy(
     {
@@ -95,6 +94,7 @@ function FormulaScope(vals, sheet) {
         let formula = sheet[key].slice(1);
 
         try {
+          // FIXME don't use math.evaluate here and in evalSheet
           vals[key] = math.evaluate(formula, receiver);
         } catch (e) {
           vals[key] = NaN;
