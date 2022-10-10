@@ -32,6 +32,7 @@ self.onmessage = function(message) {
     }
   }
 
+  // send the computed values back to the main thread
   postMessage({vals});
 };
 
@@ -100,7 +101,6 @@ function FormulaScope(vals, sheet) {
           throw e;
         }
 
-        // FIXME maybe don't do this, actually
         return vals[key];
       }
     }
