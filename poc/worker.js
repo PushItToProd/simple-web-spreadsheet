@@ -18,6 +18,7 @@ self.onmessage = function(message) {
 };
 
 function evalSheet(sheetVals) {
+  // XXX vals should probably be local to FormulaScope
   let vals = {};
   let scope = FormulaScope(vals, sheetVals);
 
@@ -56,12 +57,12 @@ class RecursionError extends Error {
 // recursion to be detected and prevented.
 const Pending = Symbol("Pending");
 
-// quasi-contructor for a magic array object that recursively computes cell
-// values. this gets passed to math.evaluate() so mathjs will use this to get
-// all variable values
+// FormulaScope is a Map-like object that uses math.evaluate() to compute the
+// values of formula inputs for the spreadsheet. It is passed to math.evaluat()
+// as the scope parameter to allow spreadsheet-style dyanmic computation.
 function FormulaScope(vals, sheet) {
-  // Math.js can accept a map object, which is based on the inclusion of the
-  // methods set(), get(), has(), and keys().
+  // Math.js expects Map objects to implement the methods set(), get(), has(),
+  // and keys().
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
   return {
     set(key, value) {
