@@ -30,7 +30,7 @@ function evalSheet(sheetVals) {
     }
 
     try {
-      vals[coord] = scope[coord];
+      vals[coord] = scope.get(coord);
     } catch (e) {
       console.error("eval failed at coordinate", coord, "with error", e);
       console.debug("current sheet:", sheetVals);
@@ -38,6 +38,9 @@ function evalSheet(sheetVals) {
       vals[coord] = {error: e.toString()};
     }
   }
+  console.debug("current sheet:", sheetVals);
+  console.debug("current vals:", vals);
+  console.debug("final FormulaScope:", scope);
   return vals;
 }
 
@@ -57,70 +60,67 @@ const Pending = Symbol("Pending");
 // values. this gets passed to math.evaluate() so mathjs will use this to get
 // all variable values
 function FormulaScope(vals, sheet) {
-  // XXX math.js can accept a Map for a scope object. perhaps this would be
-  // better implemented that way.
+  // Math.js can accept a map object, which is based on the inclusion of the
+  // methods set(), get(), has(), and keys().
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
-  return new Proxy(
-    {
-      vals: vals,
-      sheet: sheet
+  return {
+    set(key, value) {
+      throw `assignment is forbidden`
     },
-    {
-      has(obj, key) {
-        return key in obj.sheet
-      },
-      get(obj, key, receiver) {
-        let vals = obj.vals;
-        let sheet = obj.sheet;
-
-        // return already-computed values
-        if (key in vals) {
-          let val = vals[key];
-          if (val === Pending) {
-            let error = new RecursionError(key);
-            vals[key] = error.toString();
-            throw error;
-          }
-
-          // propagate errors across cells
-          if (val?.error) {
-            // TODO create a TransitiveError class to capture this
-            throw val.error;
-          }
-          return vals[key];
+    keys() {
+      return Object.keys(sheet);
+    },
+    has(key) {
+      return key in sheet
+    },
+    get(key) {
+      // return already-computed values
+      if (key in vals) {
+        let val = vals[key];
+        if (val === Pending) {
+          let error = new RecursionError(key);
+          vals[key] = error.toString();
+          throw error;
         }
 
-        if (!(key in sheet)) {
-          return undefined;
+        // propagate errors across cells
+        if (val?.error) {
+          // TODO create a TransitiveError class to capture this
+          throw val.error;
         }
-
-        let sheetVal = sheet[key];
-
-        if (sheetVal === undefined || sheetVal === '') {
-          throw ReferenceError(`${key} is empty`)
-        }
-
-        // return non-formula values verbatim
-        if (sheetVal[0] !== '=') {
-          return vals[key] = value(sheetVal);
-        }
-
-        vals[key] = Pending;  // prevent recursion
-
-        let formula = sheetVal.slice(1);
-
-        try {
-          // FIXME don't use math.evaluate here and in evalSheet
-          vals[key] = math.evaluate(formula, receiver);
-        } catch (e) {
-          vals[key] = {error: e.toString()};
-          throw e;
-        }
-
         return vals[key];
       }
-    }
-  )
+
+      if (!(key in sheet)) {
+        return undefined;
+      }
+
+      let sheetVal = sheet[key];
+
+      if (sheetVal === undefined || sheetVal === '') {
+        throw ReferenceError(`${key} is empty`)
+      }
+
+      // return non-formula values verbatim
+      if (sheetVal[0] !== '=') {
+        return vals[key] = value(sheetVal);
+      }
+
+      vals[key] = Pending;  // prevent recursion
+
+      let formula = sheetVal.slice(1);
+
+      try {
+        // FIXME don't use math.evaluate here and in evalSheet
+        vals[key] = math.evaluate(formula, this);
+      } catch (e) {
+        vals[key] = {error: e.toString()};
+        throw e;
+      }
+
+      return vals[key];
+    },
+  }
 }
 
 // stringify (badly named) coerces the value to a string if it's not a boolean
