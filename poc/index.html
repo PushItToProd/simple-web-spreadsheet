@@ -15,6 +15,10 @@
 
   <script>
     window.onerror = function(event, source, line, col, error) {
+      if (source === "" && line === 1 && col === 1) {
+        console.debug("ignoring sourceless error: %s", error)
+        return;
+      }
       // FIXME pretty sure this introduces an XSS vulnerability. If the user
       // could get some HTML into the error string, that would probably be
       // rendered here.
