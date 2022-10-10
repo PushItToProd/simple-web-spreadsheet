@@ -111,7 +111,6 @@ function FormulaScope(vals, sheet) {
       let formula = sheetVal.slice(1);
 
       try {
-        // FIXME don't use math.evaluate here and in evalSheet
         vals[key] = math.evaluate(formula, this);
       } catch (e) {
         vals[key] = {error: e.toString()};
