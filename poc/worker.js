@@ -48,11 +48,6 @@ function evalSheet(sheetVals) {
 // values. this gets passed to math.evaluate() so mathjs will use this to get
 // all variable values
 function FormulaScope(vals, sheet) {
-  // math.js has some magic checks based on special attributes. We want to throw
-  // ReferenceError for undefined variables, but if we do that for these,
-  // math.js will fail, so we return undefined for these instead.
-  const ignoredKeys = {set: true, get: true, keys: true, has: true, errs: true};
-
   // XXX math.js can accept a Map for a scope object. perhaps this would be
   // better implemented that way.
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
@@ -74,13 +69,8 @@ function FormulaScope(vals, sheet) {
           return vals[key];
         }
 
-        if (ignoredKeys[key]) {
-          return undefined;
-        }
-
-        // don't compute undefined keys
         if (!(key in sheet)) {
-          throw ReferenceError(`${key} is not defined`);
+          return undefined;
         }
 
         if (sheet[key] === undefined || sheet[key] === '') {
