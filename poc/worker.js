@@ -98,6 +98,9 @@ function FormulaScope(vals, sheet) {
           vals[key] = math.evaluate(formula, receiver);
         } catch (e) {
           vals[key] = NaN;
+          console.error("eval failed at coordinate", coord, "with error", e);
+          console.debug("current sheet:", sheetVals);
+          console.debug("current vals:", vals);
           throw e;
         }
 
