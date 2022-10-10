@@ -19,29 +19,29 @@ self.onmessage = function(message) {
 
 function evalSheet(sheetVals) {
   let scope = FormulaScope(sheetVals);
+  let results = [];
 
   for (let coord in sheetVals) {
-    let sheetVal = sheetVals[coord];
-
-    if (!isFormula(sheetVal)) {
-      // XXX remove need to introspect this
-      scope.vals[coord] = value(sheetVal);
-      continue;
-    }
-
     try {
-      scope.get(coord);
+      results[coord] = scope.get(coord);
     } catch (e) {
-      console.error("eval failed at coordinate", coord, "with error", e);
-      console.debug("current sheet:", sheetVals);
-      console.debug("current vals:", scope.vals);
-      scope.vals[coord] = {error: e.toString()};
+      if (e.name === 'ReferenceError' && e.message === `${coord} is empty`) {
+        // if the ReferenceError is for this coordinate, then that just means
+        // cell is empty.
+        // TODO check the value above and skip this entirely
+        results[coord] = '';
+      } else {
+        console.error("eval failed at coordinate", coord, "with error", e);
+        console.debug("current sheet:", sheetVals);
+        console.debug("current vals:", scope.vals);
+        results[coord] = scope.vals[coord] = {error: e.toString()};
+      }
     }
   }
   console.debug("current sheet:", sheetVals);
   console.debug("current vals:", scope.vals);
   console.debug("final FormulaScope:", scope);
-  return scope.vals;
+  return results;
 }
 
 class RecursionError extends Error {
