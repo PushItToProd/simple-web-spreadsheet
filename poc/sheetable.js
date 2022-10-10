@@ -54,6 +54,11 @@ class TimedWorker {
     // callback for killing the worker on timeout
     let timeoutCallback = () => {
       console.warn("TimedWorker timed out - killing it")
+
+      // Invoking the debugger here ensures we don't prematurely kill the worker
+      // when trying to observe errors in DevTools. Otherwise the worker will be
+      // killed even while it's paused on the exception and this will fail.
+      debugger;
       this.killWorker();
       this.timeoutCallback(message);
     }
