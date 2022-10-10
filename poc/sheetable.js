@@ -176,6 +176,13 @@ export class Sheetable {
 
       let val = vals[coord];
 
+      div.innerText = "";
+      div.className = "";
+
+      if (val === undefined) {
+        continue;
+      }
+
       // if there's an error for the cell, display it and move on
       if (val?.error) {
         div.className = "error";
@@ -183,28 +190,36 @@ export class Sheetable {
         continue;
       }
 
-      div.className = "";
-      if (utils.isString(val)) {
-        div.className = "text";
-      }
-      div.innerHTML = this.formatText(val);
-    }
-  }
+      div.innerText = val.value;
 
-  formatText(val) {
-    if ('type' in val) {
-      switch (val.type) {
-        case 'empty':
-          return '';
-        case 'number':
-        case 'string':
-        case 'boolean':
-        case 'function':
-          return val.value;
-        case 'error':
-          return val;
-        default:
-          return {error: `Unknown type ${val.type}: ${val.value}`}
+      if ('type' in val) {
+        switch (val.type) {
+          case 'empty':
+            div.innerText = "";
+            div.className = "empty";
+            break;
+          case 'number':
+            break;
+          case 'string':
+            div.className = "text";
+            div.innerText = val.value;
+            break;
+          case 'boolean':
+            div.className = "boolean";
+            div.innerText = val.value ? "TRUE" : "FALSE";
+            break;
+          case 'function':
+            div.className = "function";
+            div.innerText = val.value;
+            break;
+          case 'error':
+            div.className = "error";
+            div.textContent = val.error;
+            break;
+          default:
+            div.className = "error";
+            div.textContent = `Unknown type ${val.type}: ${val.value}`;
+        }
       }
     }
   }
