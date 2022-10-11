@@ -81,3 +81,15 @@ input:focus {
 input:focus + div {
   white-space: nowrap;
 }
+
+.sheet-controls {
+  margin-bottom: 0.25em;
+}
+
+.sheet-controls button {
+  margin-right: 0.25em;
+}
+
+.sheet-controls select {
+  height: 100%;
+}

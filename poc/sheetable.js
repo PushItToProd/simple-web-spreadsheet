@@ -82,9 +82,10 @@ class TimedWorker {
 }
 
 const StorageManager = {
-  STORAGE_KEY: "sheetData",
-  load() {
-    let json = localStorage.getItem(this.STORAGE_KEY);
+  STORAGE_PREFIX: "sheetData_",
+  load(key="") {
+    key = this.STORAGE_PREFIX + key;
+    let json = localStorage.getItem(key);
     if (json == null) {
       return null;
     }
@@ -95,7 +96,8 @@ const StorageManager = {
       return null;
     }
   },
-  save(data) {
+  save(data, key="") {
+    key = this.STORAGE_PREFIX + key;
     let json;
     console.debug("Saving data to local storage", data);
     try {
@@ -104,8 +106,20 @@ const StorageManager = {
       console.error("error stringifying JSON for local storage", e);
       throw e;
     }
-    localStorage.setItem(this.STORAGE_KEY, json);
-  }
+    localStorage.setItem(key, json);
+  },
+  getKeys() {
+    let nKeys = localStorage.length;
+    let keys = [];
+    for (let i = 0; i < nKeys; i++) {
+      let key = localStorage.key(i);
+      if (key.startsWith(this.STORAGE_PREFIX)) {
+        key = key.slice(this.STORAGE_PREFIX.length);
+        keys.push(key);
+      }
+    }
+    return keys;
+  },
 }
 
 // Sheetable takes a table HTML element and builds a spreadsheet inside it.
@@ -128,23 +142,51 @@ export class Sheetable {
         `${divElement} of type ${utils.getType(divElement)}`;
     }
 
-    this.divElement = divElement;
-
-    this.tableElement = document.createElement("table");
-    divElement.replaceChildren(this.tableElement);
-    this.options = Object.assign(this.getDefaults(), options);
     this.storageManager = storageManager;
-    if (values !== null) {
-      this.values = values;
-    } else {
-      this.values = this.storageManager.load();
-      if (this.values == null) {
-        this.values = {};
+
+    this.controls = $.div("controls");
+    this.controls.classList.add("sheet-controls");
+    this.controls.replaceChildren(
+      this.saveButton = $.button("Save as"),
+      this.loadSelector = $.create("select", "loadSelect"),
+      this.loadButton = $.button("Load"),
+    );
+
+    this.updateLoadSelector();
+    this.loadButton.onclick = () => {
+      let key = this.loadSelector.value;
+      let values = this.storageManager.load(key);
+      if (values === null) {
+        throw `unable to load stored key ${key}`
+      }
+      this.load(values)
+      this.recalc();
+    }
+    this.saveButton.onclick = () => {
+      let name = prompt("Enter save name:");
+      if (this.storageManager.getKeys().includes(name)) {
+        alert("That name is already in use - not saving");
+        return;
+      }
+      this.storageManager.save(this.values, name);
+      this.updateLoadSelector();
+    }
+
+    this.tableElement = $.create("table");
+
+    this.divElement = divElement;
+    divElement.replaceChildren(this.controls, this.tableElement);
+
+    this.options = Object.assign(this.getDefaults(), options);
+
+    if (values === null) {
+      values = this.storageManager.load(this.loadSelector.value);
+      if (values == null) {
+        values = {};
       }
     }
 
-    // startup - start the worker and fill the table
-    this.fillTable();
+    this.load(values);
     this.worker = new TimedWorker(
       // We have to explicitly bind these methods to `this` or `this` will be
       // unitialized in their scope when they're called.
@@ -152,6 +194,22 @@ export class Sheetable {
       this.workerTimeout.bind(this),
       this.recalc.bind(this),
     );
+  }
+
+  updateLoadSelector() {
+    this.loadSelector.innerHTML = '';
+    for (let saveKey of this.storageManager.getKeys()) {
+      this.loadSelector.add(new Option(saveKey));
+    }
+  }
+
+  getSaveName() {
+    return this.loadSelector.value ?? "AutoSave";
+  }
+
+  load(values) {
+    this.values = values;
+    this.fillTable();
   }
 
   // trigger the worker to recalculate the values -- upon success,
@@ -247,7 +305,7 @@ export class Sheetable {
     let resetButton = $.button("↻");
     resetButton.onclick = () => this.reset();
     tableHeader.append(resetButton);
-    this.tableElement.append(tableHeader);
+    this.tableElement.replaceChildren(tableHeader);
 
     // generate column headers
     let colNames = [];
@@ -286,6 +344,11 @@ export class Sheetable {
     let input = $.input(this.cellInputId(cellId));
 
     let val;
+    if (this.values == undefined) {
+      console.error("values is undefined!")
+      debugger;
+      throw `internal error: this.values is undefined`;
+    }
     if (cellId in this.values) {
       val = this.values[cellId];
     } else {

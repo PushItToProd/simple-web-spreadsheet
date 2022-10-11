@@ -10,8 +10,12 @@ export function find(selector) {
   return document.querySelectorAll(selector);
 }
 
-export function create(element) {
-  return document.createElement(element);
+export function create(element, id=null) {
+  let e = document.createElement(element);
+  if (typeof id === 'string' || id instanceof String) {
+    e.id = id;
+  }
+  return e;
 }
 
 export function focus(selector) {
