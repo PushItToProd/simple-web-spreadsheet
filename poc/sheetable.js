@@ -121,14 +121,17 @@ export class Sheetable {
     }
   }
 
-  constructor(tableElement, options = {}, values = null,
+  constructor(divElement, options = {}, values = null,
               storageManager = StorageManager) {
-    if (!(tableElement instanceof HTMLTableElement)) {
-      throw `Sheetable expects an HTMLTableElement but got ` +
-        `${tableElement} of type ${utils.getType(tableElement)}`;
+    if (!(divElement instanceof HTMLDivElement)) {
+      throw `Sheetable expects an HTMLDivElement but got ` +
+        `${divElement} of type ${utils.getType(divElement)}`;
     }
 
-    this.tableElement = tableElement;
+    this.divElement = divElement;
+
+    this.tableElement = document.createElement("table");
+    divElement.replaceChildren(this.tableElement);
     this.options = Object.assign(this.getDefaults(), options);
     this.storageManager = storageManager;
     if (values !== null) {
