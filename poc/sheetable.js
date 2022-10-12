@@ -151,23 +151,43 @@ class SheetControls {
 
   saveBtn_click() {
     let name = prompt("Enter save name:");
+    try {
+      this.doSave(name);
+    } catch (e) {
+      console.error("save error", e);
+      if (e?.invalidMsg) {
+        alert(e.invalidMsg);
+      } else {
+        alert(`Unknown error while saving: ${e.toString()}`);
+      }
+    }
+  }
+
+  doSave(name) {
     if (name.trim() === "" || !name) {
-      alert("Invalid name. You must enter a non-blank save name.");
-      return;
+      throw {invalidMsg: "Invalid name. You must enter a non-blank save name."};
     }
     if (this.storageManager.getKeys().includes(name)) {
-      alert("That name is already in use - not saving");
-      return;
+      throw {invalidMsg: "That name is already in use - not saving"};
     }
     this.storageManager.save(this.sheet.values, name);
     this.updateLoadSelector();
   }
 
   loadBtn_click() {
-    let key = this.loadSelector.value;
-    let values = this.storageManager.load(key);
+    let name = this.loadSelector.value;
+    try {
+      this.doLoad(name);
+    } catch (e) {
+      console.error("load error", e);
+      alert(`Error loading save: ${e.toString()}`);
+    }
+  }
+
+  doLoad(name) {
+    let values = this.storageManager.load(name);
     if (values === null) {
-      throw `unable to load stored key ${key}`
+      throw `Unable to load stored key ${key}`
     }
     this.sheet.load(values);
     this.sheet.recalc();
