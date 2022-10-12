@@ -120,6 +120,61 @@ const StorageManager = {
     }
     return keys;
   },
+  savesExist() {
+    return this.getKeys().length > 0
+  },
+}
+
+class SheetControls {
+  constructor(storageManager, sheet) {
+    this.storageManager = storageManager;
+    this.sheet = sheet;
+
+    let div = this.div = $.div("controls");
+    div.innerHTML = `
+      <button id="saveBtn">Save as</button>
+      <select id="loadSelect"></select>
+      <button id="loadBtn">Load</button>
+    `;
+    this.saveBtn = div.querySelector("#saveBtn");
+    this.loadSelector = div.querySelector("#loadSelect");
+    this.loadBtn = div.querySelector("#loadBtn");
+    this.saveBtn.onclick = this.handleSave.bind(this);
+    this.loadBtn.onclick = this.handleLoad.bind(this);
+  }
+
+  updateLoadSelector() {
+    this.loadSelector.replaceChildren(
+      ...this.storageManager.getKeys().map(saveKey => new Option(saveKey))
+    );
+  }
+
+  handleSave() {
+    let name = prompt("Enter save name:");
+    if (this.storageManager.getKeys().includes(name)) {
+      alert("That name is already in use - not saving");
+      return;
+    }
+    this.storageManager.save(this.sheet.values, name);
+    this.updateLoadSelector();
+  }
+
+  handleLoad() {
+    let key = this.loadSelector.value;
+    let values = this.storageManager.load(key);
+    if (values === null) {
+      throw `unable to load stored key ${key}`
+    }
+    this.sheet.load(values);
+    this.sheet.recalc();
+  }
+
+  get selectedSave() {
+    if (this.storageManager.savesExist) {
+      return this.loadSelector.value;
+    }
+    return null;
+  }
 }
 
 // Sheetable takes a table HTML element and builds a spreadsheet inside it.
@@ -136,64 +191,55 @@ export class Sheetable {
   }
 
   constructor(divElement, options = {}, values = null,
-              storageManager = StorageManager) {
+              storageManager = StorageManager,
+              sheetControls = SheetControls,
+              worker = TimedWorker) {
     if (!(divElement instanceof HTMLDivElement)) {
       throw `Sheetable expects an HTMLDivElement but got ` +
         `${divElement} of type ${utils.getType(divElement)}`;
     }
+    this.divElement = divElement;
+    this.options = Object.assign(this.getDefaults(), options);
 
     this.storageManager = storageManager;
 
-    this.controls = $.div("controls");
-    this.controls.classList.add("sheet-controls");
-    this.controls.replaceChildren(
-      this.saveButton = $.button("Save as"),
-      this.loadSelector = $.create("select", "loadSelect"),
-      this.loadButton = $.button("Load"),
-    );
+    this.sheetControls = new sheetControls(storageManager, this);
+    this.controls = this.sheetControls.div;
 
-    this.updateLoadSelector();
-    this.loadButton.onclick = () => {
-      let key = this.loadSelector.value;
-      let values = this.storageManager.load(key);
-      if (values === null) {
-        throw `unable to load stored key ${key}`
-      }
-      this.load(values)
-      this.recalc();
-    }
-    this.saveButton.onclick = () => {
-      let name = prompt("Enter save name:");
-      if (this.storageManager.getKeys().includes(name)) {
-        alert("That name is already in use - not saving");
-        return;
-      }
-      this.storageManager.save(this.values, name);
-      this.updateLoadSelector();
-    }
+    this.sheetControls.updateLoadSelector();
 
     this.tableElement = $.create("table");
 
-    this.divElement = divElement;
     divElement.replaceChildren(this.controls, this.tableElement);
 
-    this.options = Object.assign(this.getDefaults(), options);
-
-    if (values === null) {
-      values = this.storageManager.load(this.loadSelector.value);
-      if (values == null) {
-        values = {};
-      }
-    }
-
-    this.load(values);
-    this.worker = new TimedWorker(
+    this.initialLoad(values);
+    this.worker = new worker(
       // We have to explicitly bind these methods to `this` or `this` will be
       // unitialized in their scope when they're called.
       this.workerCallback.bind(this),
       this.workerTimeout.bind(this),
       this.recalc.bind(this),
     );
+  }
+
+  initialLoad(values) {
+    if (values !== null) {
+      this.load(values);
+      return;
+    }
+
+    let saveName = this.sheetControls.selectedSave;
+    if (saveName === null) {
+      this.load({});
+      return;
+    }
+    values = this.storageManager.load(saveName);
+    if (values === null) {
+      this.load({});
+      return;
+    }
+
+    this.load(values);
   }
 
   updateLoadSelector() {
@@ -208,7 +254,7 @@ export class Sheetable {
   }
 
   load(values) {
-    this.values = values;
+    this.values = values ?? {};
     this.fillTable();
   }
 
