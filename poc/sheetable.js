@@ -272,17 +272,6 @@ export class Sheetable {
     this.load(values);
   }
 
-  updateLoadSelector() {
-    this.loadSelector.innerHTML = '';
-    for (let saveKey of this.storageManager.getKeys()) {
-      this.loadSelector.add(new Option(saveKey));
-    }
-  }
-
-  getSaveName() {
-    return this.loadSelector.value ?? "AutoSave";
-  }
-
   load(values) {
     this.values = values ?? {};
     this.fillTable();
