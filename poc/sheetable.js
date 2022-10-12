@@ -464,7 +464,7 @@ export class Sheetable {
 
     this.worker = new worker(
       // We have to explicitly bind these methods to `this` or `this` will be
-      // unitialized in their scope when they're called.
+      // uninitialized in their scope when they're called.
       this.workerCallback.bind(this),
       this.workerTimeout.bind(this),
       this.recalc.bind(this),
