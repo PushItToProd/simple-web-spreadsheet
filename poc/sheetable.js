@@ -366,6 +366,11 @@ class SheetTable {
           td.className = "error";
           div.textContent = val.error;
           break;
+        case 'object':
+        case 'array':
+          td.className = "function";
+          div.innerText = JSON.stringify(val.value);
+          break;
         default:
           td.className = "error";
           div.textContent = `Unknown type ${val.type}: ${val.value}`;

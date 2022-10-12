@@ -61,6 +61,8 @@ function getResult(scope, coord) {
     return {type: 'function', value: scope.sheet[coord]}
   } else if (Array.isArray(value)) {
     return {type: 'array', value}
+  } else if (value instanceof math.Matrix) {
+    return {type: 'array', value: value._data}
   } else if (typeof value === "object") {
     return {type: 'object', value}
   }
