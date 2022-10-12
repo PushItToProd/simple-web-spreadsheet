@@ -139,8 +139,8 @@ class SheetControls {
     this.saveBtn = div.querySelector("#saveBtn");
     this.loadSelector = div.querySelector("#loadSelect");
     this.loadBtn = div.querySelector("#loadBtn");
-    this.saveBtn.onclick = this.handleSave.bind(this);
-    this.loadBtn.onclick = this.handleLoad.bind(this);
+    this.saveBtn.onclick = this.saveBtn_click.bind(this);
+    this.loadBtn.onclick = this.loadBtn_click.bind(this);
   }
 
   updateLoadSelector() {
@@ -149,7 +149,7 @@ class SheetControls {
     );
   }
 
-  handleSave() {
+  saveBtn_click() {
     let name = prompt("Enter save name:");
     if (name.trim() === "" || !name) {
       alert("Invalid name. You must enter a non-blank save name.");
@@ -163,7 +163,7 @@ class SheetControls {
     this.updateLoadSelector();
   }
 
-  handleLoad() {
+  loadBtn_click() {
     let key = this.loadSelector.value;
     let values = this.storageManager.load(key);
     if (values === null) {
@@ -234,6 +234,7 @@ export class Sheetable {
 
     let saveName = this.sheetControls.selectedSave;
     if (saveName === null) {
+      // no save exists
       this.load({});
       return;
     }
