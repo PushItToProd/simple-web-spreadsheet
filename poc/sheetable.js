@@ -120,7 +120,7 @@ const StorageManager = {
     }
     return keys;
   },
-  savesExist() {
+  get savesExist() {
     return this.getKeys().length > 0
   },
 }
@@ -167,6 +167,7 @@ class SheetControls {
   }
 
   doSave(name) {
+    console.log("Saving ${name}")
     if (name.trim() === "" || !name) {
       throw {invalidMsg: "Invalid name. You must enter a non-blank save name."};
     }
@@ -259,6 +260,7 @@ export class Sheetable {
     if (saveName === null) {
       // no save exists
       this.load({});
+      this.sheetControls.doSave("Default")
       return;
     }
     values = this.storageManager.load(saveName);
