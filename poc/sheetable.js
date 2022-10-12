@@ -132,14 +132,20 @@ class SheetControls {
 
     let div = this.div = $.div("controls");
     div.innerHTML = `
-      <button id="saveBtn">Save as</button>
+      <button id="saveAsBtn">Save as</button>
+      <button id="saveBtn">Save</button>
       <select id="loadSelect"></select>
       <button id="loadBtn">Load</button>
     `;
+    this.saveAsBtn = div.querySelector("#saveAsBtn");
+    this.saveAsBtn.onclick = this.saveAsBtn_click.bind(this);
+
     this.saveBtn = div.querySelector("#saveBtn");
-    this.loadSelector = div.querySelector("#loadSelect");
-    this.loadBtn = div.querySelector("#loadBtn");
     this.saveBtn.onclick = this.saveBtn_click.bind(this);
+
+    this.loadSelector = div.querySelector("#loadSelect");
+
+    this.loadBtn = div.querySelector("#loadBtn");
     this.loadBtn.onclick = this.loadBtn_click.bind(this);
   }
 
@@ -152,8 +158,25 @@ class SheetControls {
     }
   }
 
-  saveBtn_click() {
+  saveAsBtn_click() {
     let name = prompt("Enter save name:");
+    if (this.storageManager.getKeys().includes(name)) {
+      throw {invalidMsg: "That name is already in use - not saving"};
+    }
+    try {
+      this.doSave(name);
+    } catch (e) {
+      console.error("save error", e);
+      if (e?.invalidMsg) {
+        alert(e.invalidMsg);
+      } else {
+        alert(`Unknown error while saving: ${e.toString()}`);
+      }
+    }
+  }
+
+  saveBtn_click() {
+    let name = this.selectedSave;
     try {
       this.doSave(name);
     } catch (e) {
@@ -168,11 +191,11 @@ class SheetControls {
 
   doSave(name) {
     console.log("Saving ${name}")
+    if (name === null || name === undefined) {
+      throw "name is null";
+    }
     if (name.trim() === "" || !name) {
       throw {invalidMsg: "Invalid name. You must enter a non-blank save name."};
-    }
-    if (this.storageManager.getKeys().includes(name)) {
-      throw {invalidMsg: "That name is already in use - not saving"};
     }
     this.storageManager.save(this.sheet.values, name);
     this.updateLoadSelector(name);
