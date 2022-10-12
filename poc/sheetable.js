@@ -108,6 +108,10 @@ const StorageManager = {
     }
     localStorage.setItem(key, json);
   },
+  delete(key) {
+    key = this.STORAGE_PREFIX + key;
+    localStorage.removeItem(key);
+  },
   getKeys() {
     let nKeys = localStorage.length;
     let keys = [];
@@ -136,6 +140,7 @@ class SheetControls {
       <button id="saveBtn">Save</button>
       <select id="loadSelect"></select>
       <button id="loadBtn">Load</button>
+      <button id="deleteBtn">Delete</button>
     `;
     this.saveAsBtn = div.querySelector("#saveAsBtn");
     this.saveAsBtn.onclick = this.saveAsBtn_click.bind(this);
@@ -147,6 +152,9 @@ class SheetControls {
 
     this.loadBtn = div.querySelector("#loadBtn");
     this.loadBtn.onclick = this.loadBtn_click.bind(this);
+
+    this.deleteBtn = div.querySelector("#deleteBtn");
+    this.deleteBtn.onclick = this.deleteBtn_click.bind(this);
   }
 
   updateLoadSelector(selected = null) {
@@ -218,6 +226,18 @@ class SheetControls {
     }
     this.sheet.load(values);
     this.sheet.recalc();
+  }
+
+  deleteBtn_click() {
+    let name = this.selectedSave;
+    let resp = confirm(`Are you sure you want to delete '${name}'?`);
+    if (!resp) {
+      return;
+    }
+    this.storageManager.delete(name);
+    this.updateLoadSelector();
+    this.loadBtn_click();
+
   }
 
   get selectedSave() {
