@@ -151,6 +151,10 @@ class SheetControls {
 
   handleSave() {
     let name = prompt("Enter save name:");
+    if (name.trim() === "" || !name) {
+      alert("Invalid name. You must enter a non-blank save name.");
+      return;
+    }
     if (this.storageManager.getKeys().includes(name)) {
       alert("That name is already in use - not saving");
       return;
