@@ -143,10 +143,13 @@ class SheetControls {
     this.loadBtn.onclick = this.loadBtn_click.bind(this);
   }
 
-  updateLoadSelector() {
+  updateLoadSelector(selected = null) {
     this.loadSelector.replaceChildren(
-      ...this.storageManager.getKeys().map(saveKey => new Option(saveKey))
+      ...this.storageManager.getKeys().map(saveKey => new Option(saveKey, saveKey))
     );
+    if (selected !== null) {
+      this.loadSelector.value = selected;
+    }
   }
 
   saveBtn_click() {
@@ -171,7 +174,7 @@ class SheetControls {
       throw {invalidMsg: "That name is already in use - not saving"};
     }
     this.storageManager.save(this.sheet.values, name);
-    this.updateLoadSelector();
+    this.updateLoadSelector(name);
   }
 
   loadBtn_click() {
