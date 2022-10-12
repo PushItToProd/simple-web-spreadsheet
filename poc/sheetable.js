@@ -205,6 +205,175 @@ class SheetControls {
   }
 }
 
+class SheetTable {
+  constructor(rows, cols, sheet) {
+    this.rows = rows;
+    this.cols = cols;
+    this.sheet = sheet;
+    this.table = $.create("table");
+  }
+
+  reset() {
+    let element;
+    for (element of this.table.getElementsByTagName("input")) {
+      element.value = "";
+      element.setAttribute("class", "");
+    }
+    for (element of this.table.getElementsByTagName("div")) {
+      element.textContent = "";
+      element.setAttribute("class", "");
+    }
+    for (element of this.table.getElementsByTagName("td")) {
+      element.setAttribute("class", "");
+    }
+  }
+
+  fillTable() {
+    let tableHeader = $.tr();
+    let resetButton = $.button("↻");
+    resetButton.onclick = () => {
+      this.sheet.reset();
+      this.reset();
+    }
+    tableHeader.append(resetButton);
+    this.table.replaceChildren(tableHeader);
+
+    // generate column headers
+    let colNames = [];
+    for (let colNum = 0; colNum < this.cols; colNum++) {
+      let colName = columnName(colNum);
+      colNames.push(colName);
+
+      let colHeader = $.th(colName);
+      tableHeader.append(colHeader);
+    }
+
+    // generate each row
+    for (let rowNum = 1; rowNum <= this.rows; rowNum++) {
+      let tableRow = $.tr();
+      tableRow.appendChild($.th(rowNum));
+
+      colNames.forEach(colName => {
+        tableRow.append(this.makeCell(colName, rowNum));
+      })
+
+      this.table.append(tableRow);
+    }
+  }
+
+  makeCell(col, row) {
+    let cell = $.td();
+    let cellId = `${col}${row}`
+
+    let input = $.input(this.cellInputId(cellId));
+
+    let val;
+    if (cellId in this.sheet.values) {
+      val = this.sheet.values[cellId];
+    } else {
+      val = this.sheet.values[cellId] = undefined;
+    }
+    if (val !== undefined) {
+      input.value = val;
+    }
+
+    // save input data and recalculate
+    input.onchange = () => {
+      this.sheet.update(cellId, input.value);
+    }
+
+    input.onkeydown = (event) => {
+      let id;
+      switch (event.key) {
+        case "ArrowUp":
+          id = this.cellInputId(`${col}${row-1}`);
+          break;
+        case "ArrowDown":
+        case "Enter":
+          id = this.cellInputId(`${col}${row+1}`);
+          break;
+        default:
+          return;
+      }
+      id = `#${id}`;
+      $.focus(id);
+    }
+
+    cell.append(input);
+    let div = $.div(this.cellDivId(cellId));
+    div.addEventListener('click', event => {
+      input.focus();
+    });
+    cell.append(div);
+
+    return cell;
+  }
+
+  cellInputId(coord) {
+    return `${this.table.id}_input_${coord}`
+  }
+
+  cellDivId(coord) {
+    return `${this.table.id}_output_${coord}`
+  }
+
+  updateCell(coord, val) {
+    let divId = this.cellDivId(coord);
+    let div = $.id(divId);
+    if (div === null) {
+      console.error("no <div> for", coord, "with id", divId);
+      return;
+    }
+    let td = div.parentElement;
+
+    div.innerText = "";
+    td.className = "";
+
+    if (val === undefined) {
+      return;
+    }
+
+    // if there's an error for the cell, display it and move on
+    if (val?.error) {
+      td.className = "error";
+      div.textContent = val.error;
+      return;
+    }
+
+    div.innerText = val.value;
+
+    if ('type' in val) {
+      switch (val.type) {
+        case 'empty':
+          div.innerText = "";
+          td.className = "empty";
+          break;
+        case 'number':
+          break;
+        case 'string':
+          td.className = "text";
+          div.innerText = val.value;
+          break;
+        case 'boolean':
+          td.className = "boolean";
+          div.innerText = val.value ? "TRUE" : "FALSE";
+          break;
+        case 'function':
+          td.className = "function";
+          div.innerText = val.value;
+          break;
+        case 'error':
+          td.className = "error";
+          div.textContent = val.error;
+          break;
+        default:
+          td.className = "error";
+          div.textContent = `Unknown type ${val.type}: ${val.value}`;
+      }
+    }
+  }
+}
+
 // Sheetable takes a table HTML element and builds a spreadsheet inside it.
 export class Sheetable {
   // have to use a function because if we do
@@ -236,11 +405,15 @@ export class Sheetable {
 
     this.sheetControls.updateLoadSelector();
 
-    this.tableElement = $.create("table");
+    this.sheetTable = new SheetTable(
+      this.options.numRows, this.options.numCols, this
+    );
+    this.tableElement = this.sheetTable.table;
 
     divElement.replaceChildren(this.controls, this.tableElement);
 
     this.initialLoad(values);
+
     this.worker = new worker(
       // We have to explicitly bind these methods to `this` or `this` will be
       // unitialized in their scope when they're called.
@@ -274,7 +447,7 @@ export class Sheetable {
 
   load(values) {
     this.values = values ?? {};
-    this.fillTable();
+    this.sheetTable.fillTable();
   }
 
   // trigger the worker to recalculate the values -- upon success,
@@ -292,107 +465,14 @@ export class Sheetable {
   workerCallback(message) {
     let {vals} = message.data;
     for (let coord in vals) {
-      // find the div for the cell
-      let divId = this.cellDivId(coord);
-      let div = $.id(divId);
-      if (div === null) {
-        console.warn("no <div> for", coord, "with id", divId);
-        continue;
-      }
-      let td = div.parentElement;
-
       let val = vals[coord];
-
-      div.innerText = "";
-      td.className = "";
-
-      if (val === undefined) {
-        continue;
-      }
-
-      // if there's an error for the cell, display it and move on
-      if (val?.error) {
-        td.className = "error";
-        div.textContent = val.error;
-        continue;
-      }
-
-      div.innerText = val.value;
-
-      if ('type' in val) {
-        switch (val.type) {
-          case 'empty':
-            div.innerText = "";
-            td.className = "empty";
-            break;
-          case 'number':
-            break;
-          case 'string':
-            td.className = "text";
-            div.innerText = val.value;
-            break;
-          case 'boolean':
-            td.className = "boolean";
-            div.innerText = val.value ? "TRUE" : "FALSE";
-            break;
-          case 'function':
-            td.className = "function";
-            div.innerText = val.value;
-            break;
-          case 'error':
-            td.className = "error";
-            div.textContent = val.error;
-            break;
-          default:
-            td.className = "error";
-            div.textContent = `Unknown type ${val.type}: ${val.value}`;
-        }
-      }
+      this.sheetTable.updateCell(coord, val);
     }
   }
 
   reset(data = null) {
     this.values = data ?? {};
-    this.storageManager.save(this.values);
-    let element;
-    for (element of this.tableElement.getElementsByTagName("input")) {
-      element.value = "";
-      element.setAttribute("class", "");
-    }
-    for (element of this.tableElement.getElementsByTagName("div")) {
-      element.textContent = "";
-      element.setAttribute("class", "");
-    }
-  }
-
-  fillTable({numRows, numCols} = this.options) {
-    let tableHeader = $.tr();
-    let resetButton = $.button("↻");
-    resetButton.onclick = () => this.reset();
-    tableHeader.append(resetButton);
-    this.tableElement.replaceChildren(tableHeader);
-
-    // generate column headers
-    let colNames = [];
-    for (let colNum = 0; colNum < numCols; colNum++) {
-      let colName = columnName(colNum);
-      colNames.push(colName);
-
-      let colHeader = $.th(colName);
-      tableHeader.append(colHeader);
-    }
-
-    // generate each row
-    for (let rowNum = 1; rowNum <= numRows; rowNum++) {
-      let tableRow = $.tr();
-      tableRow.appendChild($.th(rowNum));
-
-      colNames.forEach(colName => {
-        tableRow.append(this.makeCell(colName, rowNum));
-      })
-
-      this.tableElement.append(tableRow);
-    }
+    this.storageManager.save(this.values, this.sheetControls.selectedSave);
   }
 
   update(cellId, value) {
@@ -402,64 +482,4 @@ export class Sheetable {
     this.storageManager.save(this.values);
   }
 
-  makeCell(col, row) {
-    let cell = $.td();
-    let cellId = `${col}${row}`
-
-    let input = $.input(this.cellInputId(cellId));
-
-    let val;
-    if (this.values == undefined) {
-      console.error("values is undefined!")
-      debugger;
-      throw `internal error: this.values is undefined`;
-    }
-    if (cellId in this.values) {
-      val = this.values[cellId];
-    } else {
-      val = this.values[cellId] = undefined;
-    }
-    if (val !== undefined) {
-      input.value = val;
-    }
-
-    // save input data and recalculate
-    input.onchange = () => {
-      this.update(cellId, input.value);
-    }
-
-    input.onkeydown = (event) => {
-      let id;
-      switch (event.key) {
-        case "ArrowUp":
-          id = this.cellInputId(`${col}${row-1}`);
-          break;
-        case "ArrowDown":
-        case "Enter":
-          id = this.cellInputId(`${col}${row+1}`);
-          break;
-        default:
-          return;
-      }
-      id = `#${id}`;
-      $.focus(id);
-    }
-
-    cell.append(input);
-    let div = $.div(this.cellDivId(cellId));
-    div.addEventListener('click', event => {
-      input.focus();
-    });
-    cell.append(div);
-
-    return cell;
-  }
-
-  cellInputId(coord) {
-    return `${this.tableElement.id}_input_${coord}`
-  }
-
-  cellDivId(coord) {
-    return `${this.tableElement.id}_output_${coord}`
-  }
 }
