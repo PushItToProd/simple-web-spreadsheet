@@ -83,6 +83,8 @@ class TimedWorker {
 
 const StorageManager = {
   STORAGE_PREFIX: "sheetData_",
+  LAST_SAVE_KEY: "sheetConfig_lastSave",
+
   load(key="") {
     key = this.STORAGE_PREFIX + key;
     let json = localStorage.getItem(key);
@@ -127,6 +129,14 @@ const StorageManager = {
   get savesExist() {
     return this.getKeys().length > 0
   },
+
+  get lastSave() {
+    return localStorage.getItem(this.LAST_SAVE_KEY);
+  },
+
+  set lastSave(val) {
+    localStorage.setItem(this.LAST_SAVE_KEY, val);
+  },
 }
 
 class SheetControls {
@@ -152,6 +162,8 @@ class SheetControls {
 
     this.deleteBtn = div.querySelector("#deleteBtn");
     this.deleteBtn.onclick = this.deleteBtn_click.bind(this);
+
+    this.updateLoadSelector(this.storageManager.lastSave);
   }
 
   updateLoadSelector(selected = null) {
@@ -211,6 +223,7 @@ class SheetControls {
     let name = this.loadSelector.value;
     try {
       this.doLoad(name);
+      this.storageManager.lastSave = name;
     } catch (e) {
       console.error("load error", e);
       alert(`Error loading save: ${e.toString()}`);
@@ -447,8 +460,6 @@ export class Sheetable {
 
     this.sheetControls = new sheetControls(storageManager, this);
     this.controls = this.sheetControls.div;
-
-    this.sheetControls.updateLoadSelector();
 
     this.sheetTable = new SheetTable(
       this.options.numRows, this.options.numCols, this
