@@ -158,8 +158,9 @@ class SheetControls {
   }
 
   updateLoadSelector(selected = null) {
+    let saveKeys = this.storageManager.getKeys();
     this.loadSelector.replaceChildren(
-      ...this.storageManager.getKeys().map(saveKey => new Option(saveKey, saveKey))
+      ...saveKeys.map(saveKey => new Option(saveKey, saveKey))
     );
     if (selected !== null) {
       this.loadSelector.value = selected;
