@@ -493,6 +493,7 @@ export class Sheetable {
     this.load(values);
   }
 
+  // load imports a full set of data and updates the table with the values
   load(values) {
     this.values = values ?? {};
     this.sheetTable.fillTable();
@@ -504,8 +505,10 @@ export class Sheetable {
     this.worker.send(this.values);
   }
 
+  // workerTimeout is called when the worker times out
   workerTimeout() {
     console.error("worker timed out");
+    // TODO display an error somewhere
   }
 
   // when the worker responds, take the results and populate the <div>s in the
@@ -518,11 +521,13 @@ export class Sheetable {
     }
   }
 
+  // reset is called when the user clicks the reset button
   reset(data = null) {
     this.values = data ?? {};
     this.storageManager.save(this.values, this.sheetControls.selectedSave);
   }
 
+  // update is called when the user enters a value into a cell
   update(cellId, value) {
     console.debug("updating %s with value %s", cellId, value);
     this.values[cellId] = value;
