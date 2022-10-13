@@ -81,6 +81,7 @@ class TimedWorker {
   }
 }
 
+// StorageManager handles loading and saving sheets saved in localStorage.
 const StorageManager = {
   STORAGE_PREFIX: "sheetData_",
   LAST_SAVE_KEY: "sheetConfig_lastSave",
@@ -139,6 +140,8 @@ const StorageManager = {
   },
 }
 
+// SheetControls is the UI component containing the top control strip elements
+// for loading, saving, etc.
 class SheetControls {
   constructor(storageManager, sheet) {
     this.storageManager = storageManager;
@@ -285,6 +288,10 @@ class SheetControls {
   }
 }
 
+// SheetTable is the UI component containing all the spreadsheet inputs and
+// outputs. Everything is displayed in a table where each <td> contains an
+// <input> for the user to enter values when the cell is selected and a <div> to
+// display the output when the cell is not selected.
 class SheetTable {
   constructor(rows, cols, sheet) {
     this.rows = rows;
@@ -293,6 +300,7 @@ class SheetTable {
     this.table = $.create("table");
   }
 
+  // reset wipes all the inputs and outputs of their values and CSS classes
   reset() {
     let element;
     for (element of this.table.getElementsByTagName("input")) {
@@ -308,6 +316,8 @@ class SheetTable {
     }
   }
 
+  // fillTable generates the table headers, rows, and columns, the reset button,
+  // and each cell's contents using makeCell
   fillTable() {
     let tableHeader = $.tr();
     let resetButton = $.button("↻");
@@ -341,6 +351,7 @@ class SheetTable {
     }
   }
 
+  // makeCell generates the <input> and <div> for each cell
   makeCell(col, row) {
     let cell = $.td();
     let cellId = `${col}${row}`
@@ -356,6 +367,8 @@ class SheetTable {
     if (val !== undefined) {
       input.value = val;
     }
+
+    // XXX maybe factor input handlers out into class methods
 
     // save input data and recalculate
     input.onchange = () => {
@@ -389,14 +402,17 @@ class SheetTable {
     return cell;
   }
 
+  // cellInputId generates the id of the <input> for a given cell coordinate
   cellInputId(coord) {
     return `${this.table.id}_input_${coord}`
   }
 
+  // cellDivId generates the id of the <div> for a given cell coordinate
   cellDivId(coord) {
     return `${this.table.id}_output_${coord}`
   }
 
+  // updateCell renders an output value for the given cell coordinate
   updateCell(coord, val) {
     let divId = this.cellDivId(coord);
     let div = $.id(divId);
@@ -459,9 +475,10 @@ class SheetTable {
   }
 }
 
-// Sheetable takes a table HTML element and builds a spreadsheet inside it.
+// Sheetable is the root class for the spreadsheet. It sets up the UI components
+// and the
 export class Sheetable {
-  // have to use a function because if we do
+  // have to use a function for getDefaults because if we do
   //    function (options = Defaults)
   // where Defaults is an object, it'll retain a mutable reference to the object
   // across invocations

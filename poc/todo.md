@@ -8,3 +8,4 @@
 - [ ] CSV/JSON export and import
 - [ ] named ranges
 - [ ] display errors
+  - ^status bar at the bottom of the page
