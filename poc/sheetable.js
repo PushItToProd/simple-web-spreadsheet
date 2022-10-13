@@ -445,15 +445,15 @@ export class Sheetable {
     }
   }
 
-  constructor(divElement, options = {},
+  constructor(parentDiv, options = {},
               storageManager = StorageManager,
               sheetControls = SheetControls,
               worker = TimedWorker) {
-    if (!(divElement instanceof HTMLDivElement)) {
+    if (!(parentDiv instanceof HTMLDivElement)) {
       throw `Sheetable expects an HTMLDivElement but got ` +
-        `${divElement} of type ${utils.getType(divElement)}`;
+        `${parentDiv} of type ${utils.getType(parentDiv)}`;
     }
-    this.divElement = divElement;
+    this.parentDiv = parentDiv;
     this.options = Object.assign(this.getDefaults(), options);
 
     this.storageManager = storageManager;
@@ -466,7 +466,7 @@ export class Sheetable {
     );
     this.tableElement = this.sheetTable.table;
 
-    divElement.replaceChildren(this.controls, this.tableElement);
+    parentDiv.replaceChildren(this.controls, this.tableElement);
 
     this.initialLoad();
 
