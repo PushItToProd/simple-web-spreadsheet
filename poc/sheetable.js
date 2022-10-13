@@ -478,15 +478,9 @@ class SheetTable {
 // Sheetable is the root class for the spreadsheet. It sets up the UI components
 // and the
 export class Sheetable {
-  // have to use a function for getDefaults because if we do
-  //    function (options = Defaults)
-  // where Defaults is an object, it'll retain a mutable reference to the object
-  // across invocations
-  getDefaults() {
-    return {
-      numRows: 10,
-      numCols: 10,
-    }
+  DEFAULTS = {
+    numRows: 10,
+    numCols: 10,
   }
 
   constructor(parentDiv, options = {},
@@ -499,7 +493,7 @@ export class Sheetable {
         `${parentDiv} of type ${utils.getType(parentDiv)}`;
     }
     this.parentDiv = parentDiv;
-    this.options = Object.assign(this.getDefaults(), options);
+    this.options = Object.assign({}, this.DEFAULTS, options);
 
     this.storageManager = storageManager;
 
