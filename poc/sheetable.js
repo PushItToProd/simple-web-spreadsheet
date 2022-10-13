@@ -172,7 +172,11 @@ class SheetControls {
       ...saveKeys.map(saveKey => new Option(saveKey, saveKey))
     );
     if (selected !== null) {
-      this.loadSelector.value = selected;
+      if (saveKeys.includes(selected)) {
+        this.loadSelector.value = selected;
+      } else {
+        console.error("updateLoadSelector called with nonexistent save key:", selected);
+      }
     }
   }
 
