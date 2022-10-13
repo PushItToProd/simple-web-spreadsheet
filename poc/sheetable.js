@@ -521,7 +521,6 @@ export class Sheetable {
   // reset is called when the user clicks the reset button
   reset(data = null) {
     this.values = data ?? {};
-    this.storageManager.save(this.values, this.sheetControls.selectedSave);
   }
 
   // update is called when the user enters a value into a cell
