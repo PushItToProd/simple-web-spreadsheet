@@ -42,7 +42,7 @@ function getResult(scope, coord) {
   try {
     value = scope.get(coord);
   } catch (e) {
-    console.error("eval failed at coordinate", coord, "with error", e);
+    console.warn("eval failed at coordinate", coord, "with error", e);
     return scope.vals[coord] = {type: 'error', error: e.toString()};
   }
 
