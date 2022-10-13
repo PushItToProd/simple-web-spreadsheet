@@ -1,5 +1,5 @@
 import * as utils from './utils.js';
-import * as $ from './html.js';
+import * as HTML from './html.js';
 
 // helper for turning a numeric column index into a letter column name, so
 // columnName(0) = 'A', columnName(1) = 'B', and so on
@@ -147,7 +147,7 @@ class SheetControls {
     this.storageManager = storageManager;
     this.sheet = sheet;
 
-    let div = this.div = $.div("controls");
+    let div = this.div = HTML.div("controls");
     div.innerHTML = `
       <button id="saveAsBtn">Save as</button>
       <button id="saveBtn">Save</button>
@@ -297,7 +297,7 @@ class SheetTable {
     this.rows = rows;
     this.cols = cols;
     this.sheet = sheet;
-    this.table = $.create("table");
+    this.table = HTML.create("table");
   }
 
   // reset wipes all the inputs and outputs of their values and CSS classes
@@ -319,8 +319,8 @@ class SheetTable {
   // fillTable generates the table headers, rows, and columns, the reset button,
   // and each cell's contents using makeCell
   fillTable() {
-    let tableHeader = $.tr();
-    let resetButton = $.button("↻");
+    let tableHeader = HTML.tr();
+    let resetButton = HTML.button("↻");
     resetButton.onclick = () => {
       this.sheet.reset();
       this.reset();
@@ -334,14 +334,14 @@ class SheetTable {
       let colName = columnName(colNum);
       colNames.push(colName);
 
-      let colHeader = $.th(colName);
+      let colHeader = HTML.th(colName);
       tableHeader.append(colHeader);
     }
 
     // generate each row
     for (let rowNum = 1; rowNum <= this.rows; rowNum++) {
-      let tableRow = $.tr();
-      tableRow.appendChild($.th(rowNum));
+      let tableRow = HTML.tr();
+      tableRow.appendChild(HTML.th(rowNum));
 
       colNames.forEach(colName => {
         tableRow.append(this.makeCell(colName, rowNum));
@@ -353,10 +353,10 @@ class SheetTable {
 
   // makeCell generates the <input> and <div> for each cell
   makeCell(col, row) {
-    let cell = $.td();
+    let cell = HTML.td();
     let cellId = `${col}${row}`
 
-    let input = $.input(this.cellInputId(cellId));
+    let input = HTML.input(this.cellInputId(cellId));
 
     let val;
     if (cellId in this.sheet.values) {
@@ -389,11 +389,11 @@ class SheetTable {
           return;
       }
       id = `#${id}`;
-      $.focus(id);
+      HTML.focus(id);
     }
 
     cell.append(input);
-    let div = $.div(this.cellDivId(cellId));
+    let div = HTML.div(this.cellDivId(cellId));
     div.addEventListener('click', event => {
       input.focus();
     });
@@ -415,7 +415,7 @@ class SheetTable {
   // updateCell renders an output value for the given cell coordinate
   updateCell(coord, val) {
     let divId = this.cellDivId(coord);
-    let div = $.id(divId);
+    let div = HTML.id(divId);
     if (div === null) {
       console.error("no <div> for", coord, "with id", divId);
       return;
