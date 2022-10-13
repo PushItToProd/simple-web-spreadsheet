@@ -139,7 +139,6 @@ class SheetControls {
       <button id="saveAsBtn">Save as</button>
       <button id="saveBtn">Save</button>
       <select id="loadSelect"></select>
-      <button id="loadBtn">Load</button>
       <button id="deleteBtn">Delete</button>
     `;
     this.saveAsBtn = div.querySelector("#saveAsBtn");
@@ -149,9 +148,7 @@ class SheetControls {
     this.saveBtn.onclick = this.saveBtn_click.bind(this);
 
     this.loadSelector = div.querySelector("#loadSelect");
-
-    this.loadBtn = div.querySelector("#loadBtn");
-    this.loadBtn.onclick = this.loadBtn_click.bind(this);
+    this.loadSelector.onchange = this.loadSelector_change.bind(this);
 
     this.deleteBtn = div.querySelector("#deleteBtn");
     this.deleteBtn.onclick = this.deleteBtn_click.bind(this);
@@ -210,7 +207,7 @@ class SheetControls {
     this.updateLoadSelector(name);
   }
 
-  loadBtn_click() {
+  loadSelector_change() {
     let name = this.loadSelector.value;
     try {
       this.doLoad(name);
@@ -237,8 +234,7 @@ class SheetControls {
     }
     this.storageManager.delete(name);
     this.updateLoadSelector();
-    this.loadBtn_click();
-
+    this.loadSelector_change();
   }
 
   get selectedSave() {
@@ -533,6 +529,7 @@ export class Sheetable {
     console.debug("updating %s with value %s", cellId, value);
     this.values[cellId] = value;
     this.recalc();
+    // FIXME either don't save or use the current save name here
     this.storageManager.save(this.values);
   }
 

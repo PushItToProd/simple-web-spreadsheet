@@ -3,6 +3,8 @@
   - [x] test handling with no saved files
   - [x] delete saved files
   - [ ] rename save
+  - [ ] load when option is picked from dropdown
+  - [ ] auto save
 - [ ] CSV/JSON export and import
 - [ ] named ranges
 - [ ] display errors
