@@ -475,6 +475,7 @@ export class Sheetable {
   constructor(parentDiv, options = {},
               storageManager = StorageManager,
               sheetControls = SheetControls,
+              sheetTable = SheetTable,
               worker = TimedWorker) {
     if (!(parentDiv instanceof HTMLDivElement)) {
       throw `Sheetable expects an HTMLDivElement but got ` +
@@ -488,7 +489,7 @@ export class Sheetable {
     this.sheetControls = new sheetControls(storageManager, this);
     this.controls = this.sheetControls.div;
 
-    this.sheetTable = new SheetTable(
+    this.sheetTable = new sheetTable(
       this.options.numRows, this.options.numCols, this
     );
     this.tableElement = this.sheetTable.table;
