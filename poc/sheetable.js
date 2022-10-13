@@ -445,7 +445,7 @@ export class Sheetable {
     }
   }
 
-  constructor(divElement, options = {}, values = null,
+  constructor(divElement, options = {},
               storageManager = StorageManager,
               sheetControls = SheetControls,
               worker = TimedWorker) {
@@ -468,7 +468,7 @@ export class Sheetable {
 
     divElement.replaceChildren(this.controls, this.tableElement);
 
-    this.initialLoad(values);
+    this.initialLoad();
 
     this.worker = new worker(
       // We have to explicitly bind these methods to `this` or `this` will be
@@ -479,12 +479,7 @@ export class Sheetable {
     );
   }
 
-  initialLoad(values) {
-    if (values !== null) {
-      this.load(values);
-      return;
-    }
-
+  initialLoad() {
     let saveName = this.sheetControls.selectedSave;
     if (saveName === null) {
       // no save exists
@@ -492,7 +487,7 @@ export class Sheetable {
       this.sheetControls.doSave("Default")
       return;
     }
-    values = this.storageManager.load(saveName);
+    let values = this.storageManager.load(saveName);
     if (values === null) {
       this.load({});
       return;
