@@ -1,0 +1,8 @@
+- [x] save and load multiple files
+  - [ ] load last opened file
+  - [x] test handling with no saved files
+  - [x] delete saved files
+  - [ ] rename save
+- [ ] CSV/JSON export and import
+- [ ] named ranges
+- [ ] display errors
