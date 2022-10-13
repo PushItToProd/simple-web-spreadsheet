@@ -529,7 +529,7 @@ export class Sheetable {
     this.values[cellId] = value;
     this.recalc();
     // FIXME either don't save or use the current save name here
-    this.storageManager.save(this.values);
+    this.storageManager.save(this.values, "AutoSave");
   }
 
 }
