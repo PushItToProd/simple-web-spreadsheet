@@ -149,6 +149,7 @@ class SheetControls {
       <button id="saveAsBtn">Save as</button>
       <button id="saveBtn">Save</button>
       <select id="loadSelect"></select>
+      <button id="renameBtn">Rename</button>
       <button id="deleteBtn">Delete</button>
     `;
     this.saveAsBtn = div.querySelector("#saveAsBtn");
@@ -159,6 +160,9 @@ class SheetControls {
 
     this.loadSelector = div.querySelector("#loadSelect");
     this.loadSelector.onchange = this.loadSelector_change.bind(this);
+
+    this.renameBtn = div.querySelector("#renameBtn");
+    this.renameBtn.onclick = this.renameBtn_click.bind(this);
 
     this.deleteBtn = div.querySelector("#deleteBtn");
     this.deleteBtn.onclick = this.deleteBtn_click.bind(this);
@@ -253,6 +257,24 @@ class SheetControls {
     this.storageManager.delete(name);
     this.updateLoadSelector();
     this.loadSelector_change();
+  }
+
+  renameBtn_click() {
+    let name = prompt("Enter new name:", this.selectedSave ?? "");
+    try {
+      this.doRename(name);
+    } catch (e) {
+      console.error("rename error", e);
+      alert(`Error renaming: ${e.toString()}`);
+    }
+  }
+
+  doRename(newName) {
+    let currentName = this.selectedSave;
+    this.doSave(newName);
+    this.storageManager.delete(currentName);
+    this.updateLoadSelector(newName);
+    this.storageManager.lastSave = newName;
   }
 
   get selectedSave() {
