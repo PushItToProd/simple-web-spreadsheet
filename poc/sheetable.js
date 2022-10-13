@@ -183,6 +183,7 @@ class SheetControls {
     }
     try {
       this.doSave(name);
+      this.storageManager.lastSave = name;
     } catch (e) {
       console.error("save error", e);
       if (e?.invalidMsg) {
