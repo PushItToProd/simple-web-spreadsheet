@@ -17,6 +17,8 @@ self.onmessage = function(message) {
   postMessage({vals});
 };
 
+// evalSheet is the main entrypoint for the worker and handles computing the
+// result for each cell in the sheet
 function evalSheet(sheetVals) {
   console.debug("evaluating sheet:", sheetVals);
   let scope = FormulaScope(sheetVals);
@@ -35,10 +37,14 @@ function evalSheet(sheetVals) {
 // for rendering.
 function getResult(scope, coord) {
   let value;
-  //
+
   if (!scope.sheet[coord]) {
     return {type: 'empty'};
   }
+
+  // get the value from the given coordinate. if there is a formula in the
+  // requested cell, scope.get() will evaluate it, in which case there could be
+  // an error.
   try {
     value = scope.get(coord);
   } catch (e) {
@@ -93,6 +99,7 @@ const Pending = Symbol("Pending");
 function FormulaScope(sheet) {
   let vals = {};  // computation results
   let vars = {};  // dynamically assigned values
+
   // Math.js expects Map objects to implement the methods set(), get(), has(),
   // and keys().
   // https://github.com/josdejong/mathjs/blob/5754478f168b67e9774d4dfbb5c4f45ad34f97ca/src/utils/map.js#L90
