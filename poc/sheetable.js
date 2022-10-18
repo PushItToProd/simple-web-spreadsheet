@@ -173,6 +173,9 @@ class SheetControls {
     this.updateLoadSelector(this.storageManager.lastSave);
   }
 
+  // updateLoadSelector updates the <select> dropdown with the names of saved
+  // sheets from StorageManager. If `selected` is not null, it changes the
+  // currently selected value to the given sheet name.
   updateLoadSelector(selected = null) {
     let saveKeys = this.storageManager.getKeys();
     this.loadSelector.replaceChildren(
@@ -497,6 +500,7 @@ export class Sheetable {
 
     this.storageManager = storageManager;
 
+    // XXX perhaps factor out a class to own the whole sheet UI
     this.sheetControls = new sheetControls(storageManager, this);
     this.controls = this.sheetControls.div;
 
@@ -518,6 +522,7 @@ export class Sheetable {
     );
   }
 
+  // initialLoad performs the first load when the sheet is still blank
   initialLoad() {
     let saveName = this.sheetControls.selectedSave;
     if (saveName === null) {
