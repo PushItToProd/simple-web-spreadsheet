@@ -143,6 +143,7 @@ const StorageManager = {
 // SheetControls is the UI component containing the top control strip elements
 // for loading, saving, etc.
 class SheetControls {
+  #loadSelector;
   constructor(storageManager, sheet) {
     this.storageManager = storageManager;
     this.sheet = sheet;
@@ -155,20 +156,20 @@ class SheetControls {
       <button id="renameBtn">Rename</button>
       <button id="deleteBtn">Delete</button>
     `;
-    this.saveAsBtn = div.querySelector("#saveAsBtn");
-    this.saveAsBtn.onclick = this.saveAsBtn_click.bind(this);
+    let saveAsBtn = div.querySelector("#saveAsBtn");
+    saveAsBtn.onclick = this.#saveAsBtn_click.bind(this);
 
-    this.saveBtn = div.querySelector("#saveBtn");
-    this.saveBtn.onclick = this.saveBtn_click.bind(this);
+    let saveBtn = div.querySelector("#saveBtn");
+    saveBtn.onclick = this.#saveBtn_click.bind(this);
 
-    this.loadSelector = div.querySelector("#loadSelect");
-    this.loadSelector.onchange = this.loadSelector_change.bind(this);
+    this.#loadSelector = div.querySelector("#loadSelect");
+    this.#loadSelector.onchange = this.#loadSelector_change.bind(this);
 
-    this.renameBtn = div.querySelector("#renameBtn");
-    this.renameBtn.onclick = this.renameBtn_click.bind(this);
+    let renameBtn = div.querySelector("#renameBtn");
+    renameBtn.onclick = this.#renameBtn_click.bind(this);
 
-    this.deleteBtn = div.querySelector("#deleteBtn");
-    this.deleteBtn.onclick = this.deleteBtn_click.bind(this);
+    let deleteBtn = div.querySelector("#deleteBtn");
+    deleteBtn.onclick = this.#deleteBtn_click.bind(this);
 
     this.updateLoadSelector(this.storageManager.lastSave);
   }
@@ -178,19 +179,19 @@ class SheetControls {
   // currently selected value to the given sheet name.
   updateLoadSelector(selected = null) {
     let saveKeys = this.storageManager.getKeys();
-    this.loadSelector.replaceChildren(
+    this.#loadSelector.replaceChildren(
       ...saveKeys.map(saveKey => new Option(saveKey, saveKey))
     );
     if (selected !== null) {
       if (saveKeys.includes(selected)) {
-        this.loadSelector.value = selected;
+        this.#loadSelector.value = selected;
       } else {
         console.error("updateLoadSelector called with nonexistent save key:", selected);
       }
     }
   }
 
-  saveAsBtn_click() {
+  #saveAsBtn_click() {
     let name = prompt("Enter save name:");
     if (this.storageManager.getKeys().includes(name)) {
       throw {invalidMsg: "That name is already in use - not saving"};
@@ -208,7 +209,7 @@ class SheetControls {
     }
   }
 
-  saveBtn_click() {
+  #saveBtn_click() {
     let name = this.selectedSave;
     try {
       this.doSave(name);
@@ -223,7 +224,7 @@ class SheetControls {
   }
 
   doSave(name) {
-    console.log("Saving ${name}")
+    console.log(`Saving ${name}`)
     if (name === null || name === undefined) {
       throw "name is null";
     }
@@ -234,10 +235,10 @@ class SheetControls {
     this.updateLoadSelector(name);
   }
 
-  loadSelector_change() {
-    let name = this.loadSelector.value;
+  #loadSelector_change() {
+    let name = this.#loadSelector.value;
     try {
-      this.doLoad(name);
+      this.#doLoad(name);
       this.storageManager.lastSave = name;
     } catch (e) {
       console.error("load error", e);
@@ -245,7 +246,7 @@ class SheetControls {
     }
   }
 
-  doLoad(name) {
+  #doLoad(name) {
     let values = this.storageManager.load(name);
     if (values === null) {
       throw `Unable to load stored key ${key}`
@@ -254,7 +255,7 @@ class SheetControls {
     this.sheet.recalc();
   }
 
-  deleteBtn_click() {
+  #deleteBtn_click() {
     let name = this.selectedSave;
     let resp = confirm(`Are you sure you want to delete '${name}'?`);
     if (!resp) {
@@ -262,20 +263,20 @@ class SheetControls {
     }
     this.storageManager.delete(name);
     this.updateLoadSelector();
-    this.loadSelector_change();
+    this.#loadSelector_change();
   }
 
-  renameBtn_click() {
+  #renameBtn_click() {
     let name = prompt("Enter new name:", this.selectedSave ?? "");
     try {
-      this.doRename(name);
+      this.#doRename(name);
     } catch (e) {
       console.error("rename error", e);
       alert(`Error renaming: ${e.toString()}`);
     }
   }
 
-  doRename(newName) {
+  #doRename(newName) {
     let currentName = this.selectedSave;
     this.doSave(newName);
     this.storageManager.delete(currentName);
@@ -285,7 +286,7 @@ class SheetControls {
 
   get selectedSave() {
     if (this.storageManager.savesExist) {
-      return this.loadSelector.value;
+      return this.#loadSelector.value;
     }
     return null;
   }
@@ -320,7 +321,7 @@ class SheetTable {
   }
 
   // fillTable generates the table headers, rows, and columns, the reset button,
-  // and each cell's contents using makeCell
+  // and each cell's contents using #makeCell
   fillTable() {
     let tableHeader = HTML.tr();
     let resetButton = HTML.button("↻");
@@ -347,19 +348,19 @@ class SheetTable {
       tableRow.appendChild(HTML.th(rowNum));
 
       colNames.forEach(colName => {
-        tableRow.append(this.makeCell(colName, rowNum));
+        tableRow.append(this.#makeCell(colName, rowNum));
       })
 
       this.table.append(tableRow);
     }
   }
 
-  // makeCell generates the <input> and <div> for each cell
-  makeCell(col, row) {
+  // #makeCell generates the <input> and <div> for each cell
+  #makeCell(col, row) {
     let cell = HTML.td();
     let cellId = `${col}${row}`
 
-    let input = HTML.input(this.cellInputId(cellId));
+    let input = HTML.input(this.#cellInputId(cellId));
 
     let val;
     if (cellId in this.sheet.values) {
@@ -382,11 +383,11 @@ class SheetTable {
       let id;
       switch (event.key) {
         case "ArrowUp":
-          id = this.cellInputId(`${col}${row-1}`);
+          id = this.#cellInputId(`${col}${row-1}`);
           break;
         case "ArrowDown":
         case "Enter":
-          id = this.cellInputId(`${col}${row+1}`);
+          id = this.#cellInputId(`${col}${row+1}`);
           break;
         default:
           return;
@@ -396,7 +397,7 @@ class SheetTable {
     }
 
     cell.append(input);
-    let div = HTML.div(this.cellDivId(cellId));
+    let div = HTML.div(this.#cellDivId(cellId));
     div.addEventListener('click', event => {
       input.focus();
     });
@@ -405,19 +406,19 @@ class SheetTable {
     return cell;
   }
 
-  // cellInputId generates the id of the <input> for a given cell coordinate
-  cellInputId(coord) {
+  // #cellInputId generates the id of the <input> for a given cell coordinate
+  #cellInputId(coord) {
     return `${this.table.id}_input_${coord}`
   }
 
-  // cellDivId generates the id of the <div> for a given cell coordinate
-  cellDivId(coord) {
+  // #cellDivId generates the id of the <div> for a given cell coordinate
+  #cellDivId(coord) {
     return `${this.table.id}_output_${coord}`
   }
 
   // updateCell renders an output value for the given cell coordinate
   updateCell(coord, val) {
-    let divId = this.cellDivId(coord);
+    let divId = this.#cellDivId(coord);
     let div = HTML.id(divId);
     if (div === null) {
       console.error("no <div> for", coord, "with id", divId);
