@@ -5,6 +5,8 @@
   - [x] rename save
   - [x] load when option is picked from dropdown
   - [x] auto save
+  - [ ] create a dialog for saving/loading
+  - [ ] don't auto-save over current save data
 - [ ] CSV/JSON export and import
 - [ ] named ranges
 - [ ] display errors **
