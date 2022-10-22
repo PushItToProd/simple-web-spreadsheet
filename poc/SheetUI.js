@@ -1,4 +1,5 @@
 import * as HTML from './html.js';
+import * as csv from './csv.js';
 
 export const ForceOverwrite = Symbol("ForceOverwrite")
 
@@ -25,8 +26,10 @@ export class SheetControls {
       <select id="loadSelect"></select>
       <button id="renameBtn">Rename</button>
       <button id="deleteBtn">Delete</button>
-      <button id="exportBtn">Export</button>
-      <button id="importBtn">Import</button>
+      <button id="exportJsonBtn">Export JSON</button>
+      <button id="importJsonBtn">Import JSON</button>
+      <button id="exportCsvBtn">Export CSV</button>
+      <button id="importCsvBtn">Import CSV</button>
     `;
     let createNewBtn = div.querySelector("#createNewBtn");
     createNewBtn.onclick = this.#createNewBtn_click.bind(this);
@@ -46,11 +49,17 @@ export class SheetControls {
     let deleteBtn = div.querySelector("#deleteBtn");
     deleteBtn.onclick = this.#deleteBtn_click.bind(this);
 
-    let exportBtn = div.querySelector("#exportBtn");
-    exportBtn.onclick = this.#exportBtn_click.bind(this);
+    let exportJsonBtn = div.querySelector("#exportJsonBtn");
+    exportJsonBtn.onclick = this.#exportJsonBtn_click.bind(this);
 
-    let importBtn = div.querySelector("#importBtn");
-    importBtn.onclick = this.#importBtn_click.bind(this);
+    let importJsonBtn = div.querySelector("#importJsonBtn");
+    importJsonBtn.onclick = this.#importJsonBtn_click.bind(this);
+
+    let exportCsvBtn = div.querySelector("#exportCsvBtn");
+    exportCsvBtn.onclick = this.#exportCsvBtn_click.bind(this);
+
+    let importCsvBtn = div.querySelector("#importCsvBtn");
+    importCsvBtn.onclick = this.#importCsvBtn_click.bind(this);
 
     this.updateLoadSelector(this.storageManager.lastSave);
   }
@@ -169,7 +178,7 @@ export class SheetControls {
     }
   }
 
-  #exportBtn_click() {
+  #exportJsonBtn_click() {
     // based on https://stackoverflow.com/a/65050772/6417784
     let fileName = this.selectedSave + ".json";
     let content = JSON.stringify(this.sheet.values);
@@ -182,7 +191,7 @@ export class SheetControls {
     a.click();
   }
 
-  #importBtn_click() {
+  #importJsonBtn_click() {
     // based on https://stackoverflow.com/a/40971885/6417784
     let input = HTML.create("input");
     input.type = 'file';
@@ -193,6 +202,70 @@ export class SheetControls {
       reader.onload = e => {
         let content = e.target.result;
         let values = JSON.parse(content);
+        // TODO implement some kind of validation here
+        this.sheet.load(values);
+        this.sheet.recalc();
+        // prompt to save
+        this.#saveAsBtn_click();
+      }
+    }
+    input.click();
+  }
+
+  #exportCsvBtn_click() {
+    // based on https://stackoverflow.com/a/65050772/6417784
+    let fileName = this.selectedSave + ".csv";
+
+    // TODO factor out CSV conversion logic
+    let values = this.sheet.values;
+    let csvValues = [];
+    let numRows = this.sheet.options.numRows;
+    let numCols = this.sheet.options.numCols;
+
+    for (let row = 1; row <= numRows; row++) {
+      let csvRow = [];
+      for (let col = 0; col < numCols; col++) {
+        let coord = `${columnName(col)}${row}`;
+        let cellVal = values[coord];
+        csvRow.push(cellVal);
+      }
+      csvValues.push(csvRow);
+    }
+
+    let csvReplacer = val => {
+      if (val === null || val === undefined) {
+        return '';
+      }
+      return val;
+    }
+
+    let content = csv.stringify(csvValues, {}, csvReplacer);
+    let file = new Blob([content], {type: 'text/csv'});
+    let objectUrl = window.URL.createObjectURL(file);
+    window.URL = window.URL || window.webkitURL;
+    let a = HTML.create("a");
+    a.href = objectUrl;
+    a.download = fileName;
+    a.click();
+  }
+
+  #importCsvBtn_click() {
+    // TODO
+    alert("Not implemented");
+    return
+
+    // based on https://stackoverflow.com/a/40971885/6417784
+    let input = HTML.create("input");
+    input.type = 'file';
+    input.onchange = e => {
+      let file = e.target.files[0];
+      let reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = e => {
+        let content = e.target.result;
+        let values = csv.parse(content);
+        // XXX convert CSV to values structure
+
         // TODO implement some kind of validation here
         this.sheet.load(values);
         this.sheet.recalc();
