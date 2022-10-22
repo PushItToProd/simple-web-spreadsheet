@@ -525,8 +525,9 @@ class SheetUI {
   }
 }
 
-// Sheetable is the root class for the spreadsheet. It sets up the UI components
-// and the
+// Sheetable is the root class for the spreadsheet. It sets up the UI
+// components, local storage interface, and worker, and handles interactions
+// between them.
 export class Sheetable {
   DEFAULTS = {
     numRows: 10,
