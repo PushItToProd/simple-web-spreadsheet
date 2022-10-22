@@ -183,6 +183,11 @@ class SheetControls {
     this.updateLoadSelector(this.storageManager.lastSave);
   }
 
+  // rootElement returns the HTML element to be embedded in the UI container.
+  rootElement() {
+    return this.div;
+  }
+
   // updateLoadSelector updates the <select> dropdown with the names of saved
   // sheets from StorageManager. If `selected` is not null, it changes the
   // currently selected value to the given sheet name.
@@ -311,6 +316,11 @@ class SheetTable {
     this.cols = cols;
     this.sheet = sheet;
     this.table = HTML.create("table");
+  }
+
+  // rootElement returns the HTML element to be embedded in the UI container.
+  rootElement() {
+    return this.table;
   }
 
   // reset wipes all the inputs and outputs of their values and CSS classes
@@ -501,16 +511,17 @@ class SheetUI {
               } = {}) {
     this.parentDiv = parentDiv;
     this.sheetControls = new sheetControls(storageManager, sheet);
-    this.controlsElement = this.sheetControls.div;
 
     this.sheetTable = new sheetTable(
       options.numRows,
       options.numCols,
       sheet
     );
-    this.tableElement = this.sheetTable.table;
 
-    parentDiv.replaceChildren(this.controlsElement, this.tableElement);
+    parentDiv.replaceChildren(
+      this.sheetControls.rootElement(),
+      this.sheetTable.rootElement(),
+    );
   }
 }
 
