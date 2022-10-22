@@ -488,6 +488,32 @@ class SheetTable {
   }
 }
 
+// SheetUI is the root of the app UI.
+class SheetUI {
+  constructor(
+              {
+                sheet,
+                options,
+                parentDiv,
+                storageManager = StorageManager,
+                sheetControls = SheetControls,
+                sheetTable = SheetTable
+              } = {}) {
+    this.parentDiv = parentDiv;
+    this.sheetControls = new sheetControls(storageManager, sheet);
+    this.controlsElement = this.sheetControls.div;
+
+    this.sheetTable = new sheetTable(
+      options.numRows,
+      options.numCols,
+      sheet
+    );
+    this.tableElement = this.sheetTable.table;
+
+    parentDiv.replaceChildren(this.controlsElement, this.tableElement);
+  }
+}
+
 // Sheetable is the root class for the spreadsheet. It sets up the UI components
 // and the
 export class Sheetable {
@@ -497,29 +523,25 @@ export class Sheetable {
   }
 
   constructor(parentDiv, options = {},
-              storageManager = StorageManager,
-              sheetControls = SheetControls,
-              sheetTable = SheetTable,
-              worker = TimedWorker) {
+              {
+                sheetUI = SheetUI,
+                storageManager = StorageManager,
+                worker = TimedWorker,
+              } = {}) {
     if (!(parentDiv instanceof HTMLDivElement)) {
       throw `Sheetable expects an HTMLDivElement but got ` +
         `${parentDiv} of type ${utils.getType(parentDiv)}`;
     }
-    this.parentDiv = parentDiv;
     this.options = Object.assign({}, this.DEFAULTS, options);
 
     this.storageManager = storageManager;
 
-    // XXX perhaps factor out a class to own the whole sheet UI
-    this.sheetControls = new sheetControls(storageManager, this);
-    this.controls = this.sheetControls.div;
-
-    this.sheetTable = new sheetTable(
-      this.options.numRows, this.options.numCols, this
-    );
-    this.tableElement = this.sheetTable.table;
-
-    parentDiv.replaceChildren(this.controls, this.tableElement);
+    this.ui = new sheetUI({
+      sheet: this,
+      options: this.options,
+      parentDiv,
+      storageManager,
+    });
 
     this.initialLoad();
 
@@ -534,11 +556,11 @@ export class Sheetable {
 
   // initialLoad performs the first load when the sheet is still blank
   initialLoad() {
-    let saveName = this.sheetControls.selectedSave;
+    let saveName = this.ui.sheetControls.selectedSave;
     if (saveName === null) {
       // no save exists
       this.load({});
-      this.sheetControls.doSave("Default")
+      this.ui.sheetControls.doSave("Default")
       return;
     }
     let values = this.storageManager.load(saveName);
@@ -553,7 +575,7 @@ export class Sheetable {
   // load imports a full set of data and updates the table with the values
   load(values) {
     this.values = values ?? {};
-    this.sheetTable.fillTable();
+    this.ui.sheetTable.fillTable();
   }
 
   // trigger the worker to recalculate the values -- upon success,
@@ -574,7 +596,7 @@ export class Sheetable {
     let {vals} = message.data;
     for (let coord in vals) {
       let val = vals[coord];
-      this.sheetTable.updateCell(coord, val);
+      this.ui.sheetTable.updateCell(coord, val);
     }
   }
 
