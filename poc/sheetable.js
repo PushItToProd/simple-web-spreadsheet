@@ -86,7 +86,7 @@ const StorageManager = {
   STORAGE_PREFIX: "sheetData_",
   LAST_SAVE_KEY: "sheetConfig_lastSave",
 
-  load(key="") {
+  load(key) {
     if (!key) {
       throw `error: save name must not be empty`;
     }
@@ -102,7 +102,7 @@ const StorageManager = {
       return null;
     }
   },
-  save(data, key="") {
+  save(data, key) {
     if (data === undefined) {
       throw `error: trying to save undefined data`;
     }
