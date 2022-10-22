@@ -159,12 +159,16 @@ class SheetControls {
 
     let div = this.div = HTML.div("controls");
     div.innerHTML = `
+      <button id="createNewBtn">Create New</button>
       <button id="saveAsBtn">Save as</button>
       <button id="saveBtn">Save</button>
       <select id="loadSelect"></select>
       <button id="renameBtn">Rename</button>
       <button id="deleteBtn">Delete</button>
     `;
+    let createNewBtn = div.querySelector("#createNewBtn");
+    createNewBtn.onclick = this.#createNewBtn_click.bind(this);
+
     let saveAsBtn = div.querySelector("#saveAsBtn");
     saveAsBtn.onclick = this.#saveAsBtn_click.bind(this);
 
@@ -205,6 +209,12 @@ class SheetControls {
     }
   }
 
+  #createNewBtn_click() {
+    this.sheet.load({});
+    this.sheet.recalc();
+    this.doSave("Untitled");
+  }
+
   #saveAsBtn_click() {
     let name = prompt("Enter save name:");
     if (this.storageManager.getKeys().includes(name)) {
@@ -243,7 +253,7 @@ class SheetControls {
       throw "name is null";
     }
     if (name.trim() === "" || !name) {
-      throw {invalidMsg: "Invalid name. You must enter a non-blank save name."};
+      throw {invalidMsg: "The sheet name must not be blank"};
     }
     this.storageManager.save(this.sheet.values, name);
     this.updateLoadSelector(name);

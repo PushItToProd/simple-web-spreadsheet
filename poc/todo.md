@@ -7,6 +7,7 @@
   - [x] auto save
   - [ ] create a dialog for saving/loading
   - [ ] don't auto-save over current save data
+  - [x] button to create new blank sheet
 - [ ] CSV/JSON export and import
 - [ ] named ranges
 - [ ] display errors **
