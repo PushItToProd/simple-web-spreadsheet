@@ -10,5 +10,5 @@
   - [x] button to create new blank sheet
 - [ ] CSV/JSON export and import
 - [ ] named ranges
-- [ ] display errors **
-  - ^status bar at the bottom of the page
+- [ ] display raised errors in a status bar at the bottom of the page
+  - e.g. exceptions from save and load

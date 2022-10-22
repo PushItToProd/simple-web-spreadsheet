@@ -157,7 +157,7 @@ class SheetControls {
     this.storageManager = storageManager;
     this.sheet = sheet;
 
-    let div = this.div = HTML.div("controls");
+    let div = this.div = HTML.createDiv("controls");
     div.innerHTML = `
       <button id="createNewBtn">Create New</button>
       <button id="saveAsBtn">Save as</button>
@@ -352,8 +352,8 @@ class SheetTable {
   // fillTable generates the table headers, rows, and columns, the reset button,
   // and each cell's contents using #makeCell
   fillTable() {
-    let tableHeader = HTML.tr();
-    let resetButton = HTML.button("↻");
+    let tableHeader = HTML.createTr();
+    let resetButton = HTML.createButton("↻");
     resetButton.onclick = () => {
       this.sheet.reset();
       this.reset();
@@ -367,14 +367,14 @@ class SheetTable {
       let colName = columnName(colNum);
       colNames.push(colName);
 
-      let colHeader = HTML.th(colName);
+      let colHeader = HTML.createTh(colName);
       tableHeader.append(colHeader);
     }
 
     // generate each row
     for (let rowNum = 1; rowNum <= this.rows; rowNum++) {
-      let tableRow = HTML.tr();
-      tableRow.appendChild(HTML.th(rowNum));
+      let tableRow = HTML.createTr();
+      tableRow.appendChild(HTML.createTh(rowNum));
 
       colNames.forEach(colName => {
         tableRow.append(this.#makeCell(colName, rowNum));
@@ -386,10 +386,10 @@ class SheetTable {
 
   // #makeCell generates the <input> and <div> for each cell
   #makeCell(col, row) {
-    let cell = HTML.td();
+    let cell = HTML.createTd();
     let cellId = `${col}${row}`
 
-    let input = HTML.input(this.#cellInputId(cellId));
+    let input = HTML.createInput(this.#cellInputId(cellId));
 
     let val;
     if (cellId in this.sheet.values) {
@@ -426,7 +426,7 @@ class SheetTable {
     }
 
     cell.append(input);
-    let div = HTML.div(this.#cellDivId(cellId));
+    let div = HTML.createDiv(this.#cellDivId(cellId));
     div.addEventListener('click', event => {
       input.focus();
     });
@@ -448,7 +448,7 @@ class SheetTable {
   // updateCell renders an output value for the given cell coordinate
   updateCell(coord, val) {
     let divId = this.#cellDivId(coord);
-    let div = HTML.id(divId);
+    let div = HTML.getId(divId);
     if (div === null) {
       console.error("no <div> for", coord, "with id", divId);
       return;

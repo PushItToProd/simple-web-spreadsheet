@@ -1,4 +1,4 @@
-export function id(id) {
+export function getId(id) {
   return document.getElementById(id);
 }
 
@@ -25,17 +25,17 @@ export function focus(selector) {
   }
 }
 
-export function button(text) {
+export function createButton(text) {
   let e = create("button");
   e.textContent = text;
   return e;
 }
 
-export function tr() {
+export function createTr() {
   return create("tr");
 }
 
-export function th(text = null) {
+export function createTh(text = null) {
   let e = create("th");
   if (text !== null) {
     e.textContent = text;
@@ -43,7 +43,7 @@ export function th(text = null) {
   return e
 }
 
-export function td(text = null) {
+export function createTd(text = null) {
   let e =  create("td");
   if (text !== null) {
     e.textContent = text;
@@ -51,13 +51,13 @@ export function td(text = null) {
   return e;
 }
 
-export function input(id) {
+export function createInput(id) {
   let e = create("input");
   e.id = id;
   return e;
 }
 
-export function div(id) {
+export function createDiv(id) {
   let e = create("div");
   e.id = id;
   return e;
