@@ -87,6 +87,9 @@ const StorageManager = {
   LAST_SAVE_KEY: "sheetConfig_lastSave",
 
   load(key="") {
+    if (!key) {
+      throw `error: save name must not be empty`;
+    }
     key = this.STORAGE_PREFIX + key;
     let json = localStorage.getItem(key);
     if (json == null) {
@@ -100,6 +103,12 @@ const StorageManager = {
     }
   },
   save(data, key="") {
+    if (data === undefined) {
+      throw `error: trying to save undefined data`;
+    }
+    if (!key) {
+      throw `error: save name must not be empty`;
+    }
     key = this.STORAGE_PREFIX + key;
     let json;
     console.debug("Saving data to local storage", data);
