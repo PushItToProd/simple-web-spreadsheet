@@ -1,3 +1,8 @@
+// SheetUI handles the main UI interactions and behavior.
+//
+// Contains import and export logic based on the following:
+// - https://stackoverflow.com/a/65050772/6417784
+// - https://stackoverflow.com/a/40971885/6417784
 import * as HTML from './html.js';
 import * as csv from './csv.js';
 
@@ -179,7 +184,6 @@ export class SheetControls {
   }
 
   #exportJsonBtn_click() {
-    // based on https://stackoverflow.com/a/65050772/6417784
     let fileName = this.selectedSave + ".json";
     let content = JSON.stringify(this.sheet.values);
     let file = new Blob([content], {type: 'application/json'});
@@ -192,7 +196,6 @@ export class SheetControls {
   }
 
   #importJsonBtn_click() {
-    // based on https://stackoverflow.com/a/40971885/6417784
     let input = HTML.create("input");
     input.type = 'file';
     input.onchange = e => {
@@ -213,7 +216,6 @@ export class SheetControls {
   }
 
   #exportCsvBtn_click() {
-    // based on https://stackoverflow.com/a/65050772/6417784
     let fileName = this.selectedSave + ".csv";
 
     // TODO factor out CSV conversion logic
@@ -250,11 +252,6 @@ export class SheetControls {
   }
 
   #importCsvBtn_click() {
-    // TODO
-    alert("Not implemented");
-    return
-
-    // based on https://stackoverflow.com/a/40971885/6417784
     let input = HTML.create("input");
     input.type = 'file';
     input.onchange = e => {
@@ -263,10 +260,22 @@ export class SheetControls {
       reader.readAsText(file, 'UTF-8');
       reader.onload = e => {
         let content = e.target.result;
-        let values = csv.parse(content);
-        // XXX convert CSV to values structure
 
-        // TODO implement some kind of validation here
+        let csvValues = csv.parse(content);
+        let numRows = this.sheet.options.numRows;
+        let numCols = this.sheet.options.numCols;
+        let values = {};
+        for (let row = 0; row < numRows; row++) {
+          for (let col = 0; col < numCols; col++) {
+            let val = csvValues[row]?.[col];
+            if (val === null || val === undefined || val === "") {
+              continue;
+            }
+            let coord = `${columnName(col)}${row + 1}`;
+            values[coord] = val;
+          }
+        }
+
         this.sheet.load(values);
         this.sheet.recalc();
         // prompt to save
