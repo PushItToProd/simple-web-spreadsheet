@@ -9,6 +9,10 @@
   - [ ] don't auto-save over current save data
   - [x] button to create new blank sheet
 - [ ] CSV/JSON export and import
+  - [x] JSON export
+  - [x] JSON import
+  - [ ] CSV export
+  - [ ] CSV import
 - [ ] named ranges
 - [ ] display raised errors in a status bar at the bottom of the page
   - e.g. exceptions from save and load

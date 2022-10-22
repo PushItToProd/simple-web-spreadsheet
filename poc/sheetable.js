@@ -1,7 +1,7 @@
 import * as utils from './utils.js';
 import TimedWorker from './TimedWorker.js';
 import StorageManager from './StorageManager.js';
-import SheetUI from './SheetUI.js';
+import SheetUI, { ForceOverwrite } from './SheetUI.js';
 
 // Sheetable is the root class for the spreadsheet. It sets up the UI
 // components, local storage interface, and worker, and handles interactions
@@ -50,7 +50,7 @@ export class Sheetable {
     if (saveName === null) {
       // no save exists
       this.load({});
-      this.ui.sheetControls.doSave("Default")
+      this.ui.sheetControls.doSave("Default", ForceOverwrite)
       return;
     }
     let values = this.storageManager.load(saveName);

@@ -1,5 +1,7 @@
 import * as HTML from './html.js';
 
+export const ForceOverwrite = Symbol("ForceOverwrite")
+
 // helper for turning a numeric column index into a letter column name, so
 // columnName(0) = 'A', columnName(1) = 'B', and so on
 function columnName(i) {
@@ -23,6 +25,8 @@ export class SheetControls {
       <select id="loadSelect"></select>
       <button id="renameBtn">Rename</button>
       <button id="deleteBtn">Delete</button>
+      <button id="exportBtn">Export</button>
+      <button id="importBtn">Import</button>
     `;
     let createNewBtn = div.querySelector("#createNewBtn");
     createNewBtn.onclick = this.#createNewBtn_click.bind(this);
@@ -41,6 +45,12 @@ export class SheetControls {
 
     let deleteBtn = div.querySelector("#deleteBtn");
     deleteBtn.onclick = this.#deleteBtn_click.bind(this);
+
+    let exportBtn = div.querySelector("#exportBtn");
+    exportBtn.onclick = this.#exportBtn_click.bind(this);
+
+    let importBtn = div.querySelector("#importBtn");
+    importBtn.onclick = this.#importBtn_click.bind(this);
 
     this.updateLoadSelector(this.storageManager.lastSave);
   }
@@ -70,14 +80,11 @@ export class SheetControls {
   #createNewBtn_click() {
     this.sheet.load({});
     this.sheet.recalc();
-    this.doSave("Untitled");
+    this.doSave("Untitled", ForceOverwrite);
   }
 
   #saveAsBtn_click() {
     let name = prompt("Enter save name:");
-    if (this.storageManager.getKeys().includes(name)) {
-      throw {invalidMsg: "That name is already in use - not saving"};
-    }
     try {
       this.doSave(name);
       this.storageManager.lastSave = name;
@@ -105,13 +112,17 @@ export class SheetControls {
     }
   }
 
-  doSave(name) {
+  doSave(name, mode = null) {
     console.log(`Saving ${name}`)
     if (name === null || name === undefined) {
-      throw "name is null";
+      // throwing a raw error because this indicates an internal problem
+      throw "save name cannot be null or undefined";
     }
     if (name.trim() === "" || !name) {
       throw {invalidMsg: "The sheet name must not be blank"};
+    }
+    if (mode !== ForceOverwrite && this.storageManager.getKeys().includes(name)) {
+      throw {invalidMsg: "That name is already in use - not saving"};
     }
     this.storageManager.save(this.sheet.values, name);
     this.updateLoadSelector(name);
@@ -156,6 +167,40 @@ export class SheetControls {
       console.error("rename error", e);
       alert(`Error renaming: ${e.toString()}`);
     }
+  }
+
+  #exportBtn_click() {
+    // based on https://stackoverflow.com/a/65050772/6417784
+    let fileName = this.selectedSave + ".json";
+    let content = JSON.stringify(this.sheet.values);
+    let file = new Blob([content], {type: 'application/json'});
+    let objectUrl = window.URL.createObjectURL(file);
+    window.URL = window.URL || window.webkitURL;
+    let a = HTML.create("a");
+    a.href = objectUrl;
+    a.download = fileName;
+    a.click();
+  }
+
+  #importBtn_click() {
+    // based on https://stackoverflow.com/a/40971885/6417784
+    let input = HTML.create("input");
+    input.type = 'file';
+    input.onchange = e => {
+      let file = e.target.files[0];
+      let reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = e => {
+        let content = e.target.result;
+        let values = JSON.parse(content);
+        // TODO implement some kind of validation here
+        this.sheet.load(values);
+        this.sheet.recalc();
+        // prompt to save
+        this.#saveAsBtn_click();
+      }
+    }
+    input.click();
   }
 
   #doRename(newName) {
