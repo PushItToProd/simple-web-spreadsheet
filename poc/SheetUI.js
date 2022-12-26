@@ -24,6 +24,7 @@ export class SheetControls {
     this.sheet = sheet;
 
     let div = this.div = HTML.createDiv("controls");
+    div.classList.add("sheet-controls");
     div.innerHTML = `
       <button id="createNewBtn">Create New</button>
       <button id="saveAsBtn">Save as</button>
