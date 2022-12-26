@@ -88,8 +88,12 @@ input:focus + div {
 
 .sheet-controls button {
   margin-right: 0.25em;
+  height: 100%;
+  padding: 1px 6px;
 }
 
 .sheet-controls select {
+  margin-right: 0.25em;
   height: 100%;
+  padding: 2px 3px;
 }
