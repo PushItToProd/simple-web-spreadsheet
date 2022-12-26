@@ -99,6 +99,12 @@ export class SheetControls {
 
   #saveAsBtn_click() {
     let name = prompt("Enter save name:");
+
+    // if name is null, the user hit the cancel button
+    if (name === null) {
+      return;
+    }
+
     try {
       this.doSave(name);
       this.storageManager.lastSave = name;
@@ -129,8 +135,7 @@ export class SheetControls {
   doSave(name, mode = null) {
     console.log(`Saving ${name}`)
     if (name === null || name === undefined) {
-      // throwing a raw error because this indicates an internal problem
-      throw "save name cannot be null or undefined";
+      throw "something went wrong - the received save name was null or undefined";
     }
     if (name.trim() === "" || !name) {
       throw {invalidMsg: "The sheet name must not be blank"};

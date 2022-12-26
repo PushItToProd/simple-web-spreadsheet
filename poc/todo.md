@@ -26,3 +26,4 @@
 - [ ] organize code into folders
 - [ ] allow adding/deleting rows and columns
 - [ ] allow selecting multiple cells
+- [ ] text formatting
