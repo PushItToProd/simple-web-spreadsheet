@@ -19,6 +19,7 @@ const StorageManager = {
       return null;
     }
   },
+
   save(data, key) {
     if (data === undefined) {
       throw `error: trying to save undefined data`;
@@ -37,10 +38,12 @@ const StorageManager = {
     }
     localStorage.setItem(key, json);
   },
+
   delete(key) {
     key = this.STORAGE_PREFIX + key;
     localStorage.removeItem(key);
   },
+
   getKeys() {
     let nKeys = localStorage.length;
     let keys = [];
@@ -53,6 +56,7 @@ const StorageManager = {
     }
     return keys;
   },
+
   get savesExist() {
     return this.getKeys().length > 0
   },
