@@ -21,6 +21,7 @@
   - [ ] vlookup
 - [ ] display raised errors in a status bar at the bottom of the page
   - e.g. exceptions from save and load
+- [ ] provide a way to view the full output of a cell instead of truncating
 - [ ] formula input bar
 - [ ] padding below menu buttons
 - [ ] organize code into folders
