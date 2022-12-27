@@ -54,7 +54,6 @@ function getResult(scope, coord) {
 
   let type = undefined;
 
-  // TODO: math.Matrix
   // TODO: math.Complex
 
   if (typeof value === "string" || value instanceof String) {
