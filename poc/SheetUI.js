@@ -83,13 +83,17 @@ export class SheetControls {
     this.#loadSelector.replaceChildren(
       ...saveKeys.map(saveKey => new Option(saveKey, saveKey))
     );
-    if (selected !== null) {
-      if (saveKeys.includes(selected)) {
-        this.#loadSelector.value = selected;
-      } else {
-        console.error("updateLoadSelector called with nonexistent save key:", selected);
-      }
+
+    if (selected === null) {
+      return;
     }
+
+    if (!saveKeys.includes(selected)) {
+      console.error("updateLoadSelector called with nonexistent save key:", selected);
+      return;
+    }
+
+    this.#loadSelector.value = selected;
   }
 
   #createNewBtn_click() {
