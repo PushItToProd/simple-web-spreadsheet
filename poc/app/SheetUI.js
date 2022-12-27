@@ -4,7 +4,7 @@
 // - https://stackoverflow.com/a/65050772/6417784
 // - https://stackoverflow.com/a/40971885/6417784
 import * as HTML from './html.js';
-import * as csv from './vendor/csv.js';
+import * as csv from '../vendor/csv.js';
 
 export const ForceOverwrite = Symbol("ForceOverwrite")
 
