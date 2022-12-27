@@ -1,4 +1,4 @@
-self.importScripts("vendor/math.js");
+self.importScripts("../vendor/math.js");
 
 function isString(o) {
   return typeof o === 'string' || o instanceof String;

@@ -5,7 +5,7 @@ const doNothing = () => null;
 // TimedWorker creates a web worker with a timeout to keep it from running
 // forever.
 export default class TimedWorker {
-  WORKER_SCRIPT = "worker.js"
+  WORKER_SCRIPT = "./worker/worker.js"
   TIMEOUT = 100;
   constructor(callback, timeoutCallback = doNothing, initCallback = doNothing,
               timeout = this.TIMEOUT) {
