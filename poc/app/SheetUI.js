@@ -126,7 +126,7 @@ export class SheetControls {
   #saveBtn_click() {
     let name = this.selectedSave;
     try {
-      this.doSave(name);
+      this.doSave(name, ForceOverwrite);
     } catch (e) {
       console.error("save error", e);
       if (e?.invalidMsg) {
