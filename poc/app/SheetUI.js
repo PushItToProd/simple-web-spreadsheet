@@ -5,6 +5,7 @@
 // - https://stackoverflow.com/a/40971885/6417784
 import * as HTML from './html.js';
 import * as csv from '../vendor/csv.js';
+import { isNumeric } from './utils.js';
 
 export const ForceOverwrite = Symbol("ForceOverwrite")
 
@@ -495,9 +496,35 @@ export class SheetTable {
           td.className = "function";
           div.innerText = JSON.stringify(val.value);
           break;
+        case 'complex':
+          let html = "";
+          let {re, im} = val.value;
+          if (!isNumeric(re) || !isNumeric(im)) {
+            throw `invalid complex number at ${coord}`;
+          }
+
+          if (re === 0 && im === 0) {
+            html = "0";
+          } else {
+            if (re !== 0) {
+              html += re;
+            }
+
+            if (im !== 0) {
+              if (im > 0 && re !== 0) {
+                html += '+';
+              }
+              html += `${im}<em>i</em>`;
+            }
+          }
+
+          div.innerHTML = html;
+          break;
         default:
           td.className = "error";
           div.textContent = `Unknown type ${val.type}: ${val.value}`;
+          console.error("Unknown type %s at %s: %s",
+                        val.type, coord, JSON.stringify(val.value));
       }
     }
   }

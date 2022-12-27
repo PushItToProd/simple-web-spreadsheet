@@ -63,13 +63,15 @@ function getResult(scope, coord) {
   } else if (typeof value === "boolean") {
     type = 'boolean';
   } else if (typeof value === "function") {
-    return {type: 'function', value: scope.sheet[coord]}
+    return {type: 'function', value: scope.sheet[coord]};
   } else if (Array.isArray(value)) {
-    return {type: 'array', value}
+    return {type: 'array', value};
   } else if (value instanceof math.Matrix) {
-    return {type: 'array', value: value._data}
+    return {type: 'array', value: value._data};
+  } else if (value instanceof math.Complex) {
+    return {type: 'complex', value: value};
   } else if (typeof value === "object") {
-    return {type: 'object', value}
+    return {type: 'object', value};
   }
 
   if (type === undefined) {

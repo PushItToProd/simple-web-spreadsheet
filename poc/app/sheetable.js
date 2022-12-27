@@ -83,6 +83,7 @@ export class Sheetable {
   // when the worker responds, take the results and populate the <div>s in the
   // table
   workerCallback(message) {
+    console.debug("got callback from worker", message);
     let {vals} = message.data;
     for (let coord in vals) {
       let val = vals[coord];
