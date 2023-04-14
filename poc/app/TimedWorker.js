@@ -42,9 +42,7 @@ export default class TimedWorker {
   // use instead of the default.
   send(message, callback = null) {
     // use default callback if none was provided
-    if (callback === null) {
-      callback = this.callback;
-    }
+    callback = callback ?? this.callback;
 
     // callback for killing the worker on timeout
     let timeoutCallback = () => {
