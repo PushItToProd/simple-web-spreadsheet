@@ -37,6 +37,7 @@ export class Sheetable {
 
     this.initialLoad();
 
+    // XXX sorta feels like we could use a wrapper here
     this.worker = new worker(
       WORKER_SCRIPT,
       // We have to explicitly bind these methods to `this` or `this` will be
