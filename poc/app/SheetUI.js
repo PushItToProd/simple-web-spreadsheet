@@ -248,13 +248,7 @@ export class SheetControls {
     }
 
     let content = csv.stringify(csvValues, {}, csvReplacer);
-    let file = new Blob([content], {type: 'text/csv'});
-    let objectUrl = window.URL.createObjectURL(file);
-    window.URL = window.URL || window.webkitURL;
-    let a = HTML.create("a");
-    a.href = objectUrl;
-    a.download = fileName;
-    a.click();
+    exports.downloadFile(fileName, 'text/csv', content);
   }
 
   #importCsvBtn_click() {
