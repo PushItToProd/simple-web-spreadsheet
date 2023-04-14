@@ -5,11 +5,15 @@ const doNothing = () => null;
 // TimedWorker creates a web worker with a timeout to keep it from running
 // forever.
 export default class TimedWorker {
-  WORKER_SCRIPT = "./worker/worker.js"
-  TIMEOUT = 100;
-  constructor(callback, timeoutCallback = doNothing, initCallback = doNothing,
-              timeout = this.TIMEOUT) {
-    this.initWorker(initCallback);
+  DEFAULT_TIMEOUT = 100;
+  constructor(
+    script,
+    callback,
+    timeoutCallback = doNothing,
+    initCallback = doNothing,
+    timeout = this.DEFAULT_TIMEOUT
+  ) {
+    this.initWorker(script, initCallback);
 
     this.callback = callback;
     this.timeoutCallback = timeoutCallback || doNothing;
@@ -18,10 +22,11 @@ export default class TimedWorker {
 
   // initWorker creates the worker, sets its callback, and sends the first
   // message.
-  initWorker(callback) {
+  initWorker(script, callback) {
     // don't initialize if the worker is still there
-    if (this.worker) return;
-    this.worker = new Worker(this.WORKER_SCRIPT);
+    if (this.worker && script === this.script) return;
+    this.script = script;
+    this.worker = new Worker(this.script);
     this.worker.onmessage = callback;
     this.worker.postMessage(null);
   }

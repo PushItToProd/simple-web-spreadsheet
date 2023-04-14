@@ -3,6 +3,8 @@ import TimedWorker from './TimedWorker.js';
 import StorageManager from './StorageManager.js';
 import SheetUI, { ForceOverwrite } from './SheetUI.js';
 
+const WORKER_SCRIPT = "./worker/worker.js";
+
 // Sheetable is the root class for the spreadsheet. It sets up the UI
 // components, local storage interface, and worker, and handles interactions
 // between them.
@@ -36,6 +38,7 @@ export class Sheetable {
     this.initialLoad();
 
     this.worker = new worker(
+      WORKER_SCRIPT,
       // We have to explicitly bind these methods to `this` or `this` will be
       // uninitialized in their scope when they're called.
       this.workerCallback.bind(this),
