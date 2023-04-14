@@ -4,6 +4,7 @@
 // - https://stackoverflow.com/a/65050772/6417784
 // - https://stackoverflow.com/a/40971885/6417784
 import * as HTML from './html.js';
+import * as exports from './exports.js';
 import * as csv from '../vendor/csv.js';
 import { isNumeric } from './utils.js';
 
@@ -197,13 +198,7 @@ export class SheetControls {
   #exportJsonBtn_click() {
     let fileName = this.selectedSave + ".json";
     let content = JSON.stringify(this.sheet.values);
-    let file = new Blob([content], {type: 'application/json'});
-    let objectUrl = window.URL.createObjectURL(file);
-    window.URL = window.URL || window.webkitURL;
-    let a = HTML.create("a");
-    a.href = objectUrl;
-    a.download = fileName;
-    a.click();
+    exports.downloadFile(fileName, 'application/json', content);
   }
 
   #importJsonBtn_click() {
