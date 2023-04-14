@@ -202,23 +202,14 @@ export class SheetControls {
   }
 
   #importJsonBtn_click() {
-    let input = HTML.create("input");
-    input.type = 'file';
-    input.onchange = e => {
-      let file = e.target.files[0];
-      let reader = new FileReader();
-      reader.readAsText(file, 'UTF-8');
-      reader.onload = e => {
-        let content = e.target.result;
-        let values = JSON.parse(content);
-        // TODO implement some kind of validation here
-        this.sheet.load(values);
-        this.sheet.recalc();
-        // prompt to save
-        this.#saveAsBtn_click();
-      }
-    }
-    input.click();
+    exports.uploadFile().then(content => {
+      let values = JSON.parse(content);
+      // TODO implement some kind of validation here
+      this.sheet.load(values);
+      this.sheet.recalc();
+      // prompt to save
+      this.#saveAsBtn_click();
+    }).catch(alert);
   }
 
   #exportCsvBtn_click() {
@@ -252,37 +243,27 @@ export class SheetControls {
   }
 
   #importCsvBtn_click() {
-    let input = HTML.create("input");
-    input.type = 'file';
-    input.onchange = e => {
-      let file = e.target.files[0];
-      let reader = new FileReader();
-      reader.readAsText(file, 'UTF-8');
-      reader.onload = e => {
-        let content = e.target.result;
-
-        let csvValues = csv.parse(content);
-        let numRows = this.sheet.options.numRows;
-        let numCols = this.sheet.options.numCols;
-        let values = {};
-        for (let row = 0; row < numRows; row++) {
-          for (let col = 0; col < numCols; col++) {
-            let val = csvValues[row]?.[col];
-            if (val === null || val === undefined || val === "") {
-              continue;
-            }
-            let coord = `${columnName(col)}${row + 1}`;
-            values[coord] = val;
+    exports.uploadFile().then(content => {
+      let csvValues = csv.parse(content);
+      let numRows = this.sheet.options.numRows;
+      let numCols = this.sheet.options.numCols;
+      let values = {};
+      for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+          let val = csvValues[row]?.[col];
+          if (val === null || val === undefined || val === "") {
+            continue;
           }
+          let coord = `${columnName(col)}${row + 1}`;
+          values[coord] = val;
         }
-
-        this.sheet.load(values);
-        this.sheet.recalc();
-        // prompt to save
-        this.#saveAsBtn_click();
       }
-    }
-    input.click();
+
+      this.sheet.load(values);
+      this.sheet.recalc();
+      // prompt to save
+      this.#saveAsBtn_click();
+    }).catch(alert);
   }
 
   #doRename(newName) {

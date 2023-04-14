@@ -10,3 +10,19 @@ export function downloadFile(fileName, type, content) {
   a.click();
   windowUrl.revokeObjectURL(file);
 }
+
+export function uploadFile() {
+  return new Promise((resolve) => {
+    let input = HTML.create("input");
+    input.type = 'file';
+    input.onchange = e => {
+      let file = e.target.files[0];
+      let reader = new FileReader();
+      reader.onload = e => {
+        resolve(e.target.result);
+      };
+      reader.readAsText(file, 'UTF-8');
+    };
+    input.click();
+  });
+}
