@@ -6,7 +6,7 @@
 import * as HTML from './html.js';
 import * as exports from './exports.js';
 import * as csv from '../vendor/csv.js';
-import { isNumeric } from './utils.js';
+import * as utils from './utils.js';
 
 export const ForceOverwrite = Symbol("ForceOverwrite")
 
@@ -473,7 +473,7 @@ export class SheetTable {
         case 'complex':
           let html = "";
           let {re, im} = val.value;
-          if (!isNumeric(re) || !isNumeric(im)) {
+          if (!utils.isNumeric(re) || !utils.isNumeric(im)) {
             throw `invalid complex number at ${coord}`;
           }
 
