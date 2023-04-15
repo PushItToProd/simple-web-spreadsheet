@@ -105,7 +105,11 @@ export class SheetControls {
   }
 
   #saveAsBtn_click() {
-    let name = prompt("Enter save name:");
+    this.#saveAs();
+  }
+
+  #saveAs(defaultName = "") {
+    let name = prompt("Enter save name:", defaultName);
 
     // if name is null, the user hit the cancel button
     if (name === null) {
@@ -208,7 +212,7 @@ export class SheetControls {
       this.sheet.load(values);
       this.sheet.recalc();
       // prompt to save
-      this.#saveAsBtn_click();
+      this.#saveAs();
     }).catch(alert);
   }
 
@@ -262,7 +266,7 @@ export class SheetControls {
       this.sheet.load(values);
       this.sheet.recalc();
       // prompt to save
-      this.#saveAsBtn_click();
+      this.#saveAs();
     }).catch(alert);
   }
 
