@@ -206,13 +206,13 @@ export class SheetControls {
   }
 
   #importJsonBtn_click() {
-    exports.uploadFile().then(content => {
+    exports.uploadFile().then(({content, fileName}) => {
       let values = JSON.parse(content);
       // TODO implement some kind of validation here
       this.sheet.load(values);
       this.sheet.recalc();
       // prompt to save
-      this.#saveAs();
+      this.#saveAs(fileName);
     }).catch(alert);
   }
 
@@ -247,7 +247,7 @@ export class SheetControls {
   }
 
   #importCsvBtn_click() {
-    exports.uploadFile().then(content => {
+    exports.uploadFile().then(({content, fileName}) => {
       let csvValues = csv.parse(content);
       let numRows = this.sheet.options.numRows;
       let numCols = this.sheet.options.numCols;
@@ -266,7 +266,7 @@ export class SheetControls {
       this.sheet.load(values);
       this.sheet.recalc();
       // prompt to save
-      this.#saveAs();
+      this.#saveAs(fileName);
     }).catch(alert);
   }
 

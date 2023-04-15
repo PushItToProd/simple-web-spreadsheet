@@ -15,11 +15,18 @@ export function uploadFile() {
   return new Promise((resolve) => {
     let input = HTML.create("input");
     input.type = 'file';
-    input.onchange = e => {
-      let file = e.target.files[0];
+    input.onchange = changeEvent => {
+      let {files} = changeEvent.target;
+      if (files.length > 1) {
+        throw "can't upload more than one file at a time";
+      }
+      let file = files[0];
       let reader = new FileReader();
-      reader.onload = e => {
-        resolve(e.target.result);
+      reader.onload = readEvent => {
+        resolve({
+          content: readEvent.target.result,
+          fileName: file.name,
+        });
       };
       reader.readAsText(file, 'UTF-8');
     };
