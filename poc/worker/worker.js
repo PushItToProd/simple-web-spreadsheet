@@ -56,11 +56,12 @@ function getResult(scope, coord) {
   // TODO: factor out this bit of logic to a separate function for cleanliness
   let type = undefined;
   if (typeof value === "string" || value instanceof String) {
-    type = 'string';
+    return {type: 'string', value};
   } else if (typeof value === "number" || typeof value === "bigint") {
     type = 'number';
+    return {type: 'number', value};
   } else if (typeof value === "boolean") {
-    type = 'boolean';
+    return {type: 'boolean', value};
   } else if (typeof value === "function") {
     return {type: 'function', value: scope.sheet[coord]};
   } else if (Array.isArray(value)) {
@@ -71,14 +72,10 @@ function getResult(scope, coord) {
     return {type: 'complex', value: value};
   } else if (typeof value === "object") {
     return {type: 'object', value};
-  }
-
-  if (type === undefined) {
+  } else {
     console.error("value has unknown type", value);
     return {type: 'error', error: 'invalid type'};
   }
-
-  return {type, value};
 }
 
 // RecursionError is raised when a circular reference is found.
