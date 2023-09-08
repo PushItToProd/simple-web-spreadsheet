@@ -17,7 +17,7 @@ export function isNumeric(o) {
 
 // isObject checks if an object is a pure object, not a class or anything
 export function isObject(o) {
-  return o?.constructor === Object
+  return o?.constructor === Object;
 }
 
 export function objectIsEmpty(o) {
