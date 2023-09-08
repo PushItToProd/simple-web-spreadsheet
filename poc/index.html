@@ -14,20 +14,26 @@
   <div id="errorMsg"></div>
 
   <script>
+    // escapeHTML replaces all special characters.
+    // via https://stackoverflow.com/a/66481918/6417784
+    function escapeHTML(unsafe) {
+      return unsafe.replace(
+        /[\u0000-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u00FF]/g,
+        c => '&#' + ('000' + c.charCodeAt(0)).slice(-4) + ';'
+      )
+    }
+
     window.onerror = function(event, source, line, col, error) {
       if (source === "" && line === 1 && col === 1) {
-        console.debug("ignoring sourceless error: %s", error)
+        console.warn("ignoring sourceless error: %s", error)
         return;
       }
-      // FIXME pretty sure this introduces an XSS vulnerability. If the user
-      // could get some HTML into the error string, that would probably be
-      // rendered here.
       document.getElementById("errorMsg").innerHTML = `
-        <b>Error!</b><br/>
-        Source: ${source}<br/>
-        Line: ${line}<br/>
-        Col: ${col}<br/>
-        Error: ${error}
+        <b>Uncaught Error!</b><br/>
+        Source: ${escapeHTML(source)}<br/>
+        Line: ${escapeHTML(line)}<br/>
+        Col: ${escapeHTML(col)}<br/>
+        Error: ${escapeHTML(error)}
       `;
     }
   </script>
