@@ -13,6 +13,7 @@
   - [x] JSON import
   - [x] CSV export
   - [x] CSV import
+- [ ] don't propagate errors verbatim - just report an error in another cell
 - [ ] range functions
 - [ ] named ranges
 - [ ] formula functions
@@ -21,7 +22,7 @@
   - [ ] vlookup
 - [ ] display raised errors in a status bar at the bottom of the page
   - e.g. exceptions from save and load
-- [ ] provide a way to view the full output of a cell instead of truncating
+- [ ] provide a way to view the full output of a cell instead of truncating (like the formula edit bar in Excel)
 - [ ] formula input bar
 - [ ] padding below menu buttons
 - [ ] organize code into folders
