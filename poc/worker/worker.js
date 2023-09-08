@@ -163,7 +163,7 @@ function FormulaScope(sheet) {
         // propagate errors across cells
         if (val?.error) {
           // TODO create a TransitiveError class to capture this
-          throw val.error;
+          throw ReferenceError(`error in ${key}`)
         }
 
         return vals[key];

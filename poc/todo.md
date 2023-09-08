@@ -13,7 +13,7 @@
   - [x] JSON import
   - [x] CSV export
   - [x] CSV import
-- [ ] don't propagate errors verbatim - just report an error in another cell
+- [x] don't propagate errors verbatim - just report an error in another cell
 - [ ] range functions
 - [ ] named ranges
 - [ ] formula functions
