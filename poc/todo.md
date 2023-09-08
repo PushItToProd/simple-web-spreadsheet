@@ -14,6 +14,7 @@
   - [x] CSV export
   - [x] CSV import
 - [x] don't propagate errors verbatim - just report an error in another cell
+- [ ] multiple sheets
 - [ ] range functions
 - [ ] named ranges
 - [ ] formula functions
