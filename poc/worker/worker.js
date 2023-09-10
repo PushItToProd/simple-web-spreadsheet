@@ -54,11 +54,9 @@ function getResult(scope, coord) {
 
   // Determine the type of the object.
   // TODO: factor out this bit of logic to a separate function for cleanliness
-  let type = undefined;
   if (typeof value === "string" || value instanceof String) {
     return {type: 'string', value};
   } else if (typeof value === "number" || typeof value === "bigint") {
-    type = 'number';
     return {type: 'number', value};
   } else if (typeof value === "boolean") {
     return {type: 'boolean', value};
