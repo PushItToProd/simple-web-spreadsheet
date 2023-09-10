@@ -38,7 +38,7 @@ export function stringifyObject(val) {
     if (val.constructor?.name && !Array.isArray(val) && !utils.isObject(val)) {
       text = text.concat(val.constructor.name).concat(' ');
     }
-    let json = `${JSON.stringify(val)}`;
+    let json = JSON.stringify(val);
     if (json !== '{}') {
       return text.concat(json);
     }
